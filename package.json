@@ -1,6 +1,6 @@
 {
   "name": "react-native-pip-view",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Custom PiP View component",
   "source": "./src/index.tsx",
   "main": "./lib/module/index.js",
