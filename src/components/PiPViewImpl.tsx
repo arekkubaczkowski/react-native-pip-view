@@ -1,7 +1,7 @@
-import React, { useCallback, useMemo, type PropsWithChildren } from 'react';
-import { type LayoutChangeEvent } from 'react-native';
+import { useCallback, useMemo, type PropsWithChildren } from 'react';
+import { StyleSheet, type LayoutChangeEvent } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import {
+import Animated, {
   useAnimatedReaction,
   useAnimatedStyle,
   useDerivedValue,
@@ -11,17 +11,15 @@ import {
   type SharedValue,
 } from 'react-native-reanimated';
 
-import { ARROW_WIDTH } from './constants';
+import { ARROW_WIDTH, customAnimations } from '../constants';
 import { LeftExpandButton } from './LeftExpandButton';
-import { type ContainerLayoutRectangle, type Dimensions } from './models';
-import { usePiPViewContext } from './PiPView.provider';
+import { type ContainerLayoutRectangle, type Dimensions } from '../models';
+import { usePiPViewContext } from '../context/PiPView.provider';
 import { RightExpandButton } from './RightExpandButton';
-import { useDragHelpers } from './useDragHelpers';
-import { usePanGesture } from './usePanGesture';
-import { usePinchGesture } from './usePinchGesture';
-import { getEdges } from './utils';
-import { customAnimations } from '@/services/Unistyles/themes';
-import { AnimatedView } from '@/ui/StyledView/AnimatedView';
+import { getEdges } from '../utils';
+import { usePanGesture } from '../hooks/usePanGesture';
+import { usePinchGesture } from '../hooks/usePinchGesture';
+import { useDragHelpers } from '../hooks/useDragHelpers';
 
 export const PiPViewImpl = ({ children }: PropsWithChildren) => {
   const {
@@ -40,7 +38,7 @@ export const PiPViewImpl = ({ children }: PropsWithChildren) => {
     onPress,
     scale,
     destroyArea,
-  } = usePiPViewContext(state => ({
+  } = usePiPViewContext((state) => ({
     elementLayout: state.elementLayout,
     overDragSide: state.overDragSide,
     onDestroy: state.onDestroy,
@@ -64,7 +62,7 @@ export const PiPViewImpl = ({ children }: PropsWithChildren) => {
     (event: LayoutChangeEvent) => {
       elementLayout.value = event.nativeEvent.layout;
     },
-    [elementLayout],
+    [elementLayout]
   );
 
   const { pan: panGesture, handlePanEnd } = usePanGesture();
@@ -72,10 +70,10 @@ export const PiPViewImpl = ({ children }: PropsWithChildren) => {
   const { findNearestYEdge } = useDragHelpers();
 
   const diffX = useDerivedValue(
-    () => scaledElementLayout.value.width - elementLayout.value.width,
+    () => scaledElementLayout.value.width - elementLayout.value.width
   );
   const diffY = useDerivedValue(
-    () => scaledElementLayout.value.height - elementLayout.value.height,
+    () => scaledElementLayout.value.height - elementLayout.value.height
   );
 
   const offsetX = useDerivedValue(() => diffX.value / 2);
@@ -84,7 +82,7 @@ export const PiPViewImpl = ({ children }: PropsWithChildren) => {
   const getCurrentHorizontalSide = useCallback(
     (
       currentContainerLayout: ContainerLayoutRectangle,
-      currentElementLayout: SharedValue<Dimensions>,
+      currentElementLayout: SharedValue<Dimensions>
     ) => {
       'worklet';
       return translationX.value <
@@ -92,7 +90,7 @@ export const PiPViewImpl = ({ children }: PropsWithChildren) => {
         ? 'left'
         : 'right';
     },
-    [translationX],
+    [translationX]
   );
 
   const tapGesture = useMemo(
@@ -106,12 +104,12 @@ export const PiPViewImpl = ({ children }: PropsWithChildren) => {
           }
           onPress?.();
         }),
-    [dockSide, onPress],
+    [dockSide, onPress]
   );
 
   const gesture = Gesture.Race(
     tapGesture,
-    Gesture.Simultaneous(panGesture, pinchGesture),
+    Gesture.Simultaneous(panGesture, pinchGesture)
   );
 
   const handleExpandView = useCallback(() => {
@@ -160,19 +158,19 @@ export const PiPViewImpl = ({ children }: PropsWithChildren) => {
       if (!dockSide.value) {
         const currentEdges = getEdges(
           currentContainerLayout,
-          currentScaledElementLayout,
+          currentScaledElementLayout
         );
         const snapToLeft =
           getCurrentHorizontalSide(
             currentContainerLayout,
-            currentScaledElementLayout,
+            currentScaledElementLayout
           ) === 'left';
         const targetX = snapToLeft ? currentEdges.minX : currentEdges.maxX;
 
         translationX.value = targetX;
       }
     },
-    [edges],
+    [edges]
   );
 
   const animatedStyle = useAnimatedStyle(() => {
@@ -201,13 +199,13 @@ export const PiPViewImpl = ({ children }: PropsWithChildren) => {
         {
           translateX: withSpring(
             translationX.value + offsetX.value + overDragOffsetX,
-            customAnimations.lazy,
+            customAnimations.lazy
           ),
         },
         {
           translateY: withSpring(
             translationY.value + offsetY.value,
-            customAnimations.lazy,
+            customAnimations.lazy
           ),
         },
         {
@@ -234,7 +232,7 @@ export const PiPViewImpl = ({ children }: PropsWithChildren) => {
           ? destroyArea?.activeColor!
           : active
             ? destroyArea?.inactiveColor!
-            : 'transparent',
+            : 'transparent'
       ),
       height: destroyArea?.position.height,
       width: destroyArea?.position.width,
@@ -246,48 +244,50 @@ export const PiPViewImpl = ({ children }: PropsWithChildren) => {
   const containerStyles = useAnimatedStyle(() => ({
     opacity: withDelay(
       200,
-      withSpring(
-        isInitialized.value ? 1 : 0,
-        customAnimations.responsiveSpring,
-      ),
+      withSpring(isInitialized.value ? 1 : 0, customAnimations.responsiveSpring)
     ),
   }));
 
   return (
     <>
       {destroyArea && (
-        <AnimatedView
-          position="absolute"
-          borderRadius={16}
-          height={100}
-          zIndex={999}
-          pointerEvents="none"
-          style={destroyAreaStyle}
-        />
+        <Animated.View style={[destroyAreaStyle, styles.destroyArea]} />
       )}
 
       {layout.width > 0 && layout.height > 0 && (
         <GestureDetector gesture={gesture}>
-          <AnimatedView
-            position="absolute"
-            zIndex={9999}
-            style={containerStyles}
-          >
-            <AnimatedView
+          <Animated.View style={[containerStyles, styles.container]}>
+            <Animated.View
               onLayout={handleLayoutChange}
-              position="absolute"
-              top={0}
-              left={0}
-              style={animatedStyle}
+              style={[animatedStyle, styles.innerContainer]}
             >
               {children}
 
               <LeftExpandButton onPress={handleExpandView} />
               <RightExpandButton onPress={handleExpandView} />
-            </AnimatedView>
-          </AnimatedView>
+            </Animated.View>
+          </Animated.View>
         </GestureDetector>
       )}
     </>
   );
 };
+
+const styles = StyleSheet.create({
+  destroyArea: {
+    position: 'absolute',
+    borderRadius: 16,
+    zIndex: 999,
+    pointerEvents: 'none',
+  },
+  container: {
+    position: 'absolute',
+    zIndex: 9999,
+  },
+  innerContainer: {
+    position: 'absolute',
+    zIndex: 9999,
+    left: 0,
+    top: 0,
+  },
+});

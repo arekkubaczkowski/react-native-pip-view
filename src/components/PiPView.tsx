@@ -1,12 +1,12 @@
-import React, { useCallback, useMemo, type PropsWithChildren } from 'react';
+import { useCallback, useMemo, type PropsWithChildren } from 'react';
 import { type LayoutRectangle } from 'react-native';
 import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
 
-import { type Dimensions, type EdgeSide, type PiPViewProps } from './models';
-import { PiPViewProvider } from './PiPView.provider';
+import { type Dimensions, type EdgeSide, type PiPViewProps } from '../models';
+import { PiPViewProvider } from '../context/PiPView.provider';
 import { PiPViewImpl } from './PiPViewImpl';
-import { useInitialPosition } from './useInitialPosition';
-import { getEdges } from './utils';
+import { getEdges } from '../utils';
+import { useInitialPosition } from '../hooks/useInitialPosition';
 
 export const PiPView = ({
   children,
@@ -23,7 +23,7 @@ export const PiPView = ({
     y: 0,
   });
   const isInitialized = useDerivedValue(
-    () => elementLayout.value.width > 0 && elementLayout.value.height > 0,
+    () => elementLayout.value.width > 0 && elementLayout.value.height > 0
   );
 
   const isActive = useSharedValue(false);
@@ -52,7 +52,7 @@ export const PiPView = ({
   });
 
   const overDragOffset = useDerivedValue(
-    () => scaledElementLayout.value.width * 0.4,
+    () => scaledElementLayout.value.width * 0.4
   );
 
   const overDragSide = useSharedValue<EdgeSide | null>(null);
@@ -101,7 +101,7 @@ export const PiPView = ({
       isInitialized,
       edges,
       props,
-    ],
+    ]
   );
 
   return (

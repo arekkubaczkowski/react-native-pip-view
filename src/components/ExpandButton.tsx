@@ -1,11 +1,12 @@
-import React from 'react';
 import {
+  StyleSheet,
+  TouchableOpacity,
   type GestureResponderEvent,
   type LayoutRectangle,
   type StyleProp,
   type ViewStyle,
 } from 'react-native';
-import {
+import Animated, {
   useAnimatedStyle,
   withSpring,
   withTiming,
@@ -13,10 +14,8 @@ import {
 } from 'react-native-reanimated';
 
 import { ArrowButton } from './ArrowButton';
-import { type EdgeSide } from './models';
-import { customAnimations } from '@/services/Unistyles/themes';
-import { AnimatedView } from '@/ui/StyledView/AnimatedView';
-import { Touchable } from '@/ui/Touchable';
+import { type EdgeSide } from '../models';
+import { customAnimations } from '../constants';
 
 interface Props {
   translateX: SharedValue<number>;
@@ -51,15 +50,18 @@ export const ExpandButton = ({
   }));
 
   return (
-    <AnimatedView
-      style={[containerStyle, style]}
-      justifyContent="center"
-      alignItems="flex-start"
-      position="absolute"
-    >
-      <Touchable onPress={onPress}>
+    <Animated.View style={[containerStyle, style, styles.button]}>
+      <TouchableOpacity onPress={onPress}>
         <ArrowButton side={side} isVisible={isVisible} />
-      </Touchable>
-    </AnimatedView>
+      </TouchableOpacity>
+    </Animated.View>
   );
 };
+
+const styles = StyleSheet.create({
+  button: {
+    position: 'absolute',
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+  },
+});

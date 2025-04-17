@@ -6,8 +6,8 @@ import {
 } from 'react-native-gesture-handler';
 import { clamp, runOnJS, useDerivedValue } from 'react-native-reanimated';
 
-import { usePiPViewContext } from './PiPView.provider';
 import { useDragHelpers } from './useDragHelpers';
+import { usePiPViewContext } from '../context/PiPView.provider';
 
 const VELOCITY_Y_MULTIPLIER = 0.1;
 const VELOCITY_X_MULTIPLIER = 0.05;
@@ -29,7 +29,7 @@ export const usePanGesture = () => {
     onDestroy,
     prevTranslationX,
     prevTranslationY,
-  } = usePiPViewContext(state => ({
+  } = usePiPViewContext((state) => ({
     snapToEdges: state.snapToEdges,
     _providedEdges: state.edges,
     dockSide: state.dockSide,
@@ -53,7 +53,7 @@ export const usePanGesture = () => {
         maxX: 0,
         minY: 0,
         maxY: 0,
-      },
+      }
   );
 
   const {
@@ -68,14 +68,14 @@ export const usePanGesture = () => {
     () =>
       edges.value.minX -
       scaledElementLayout.value.width -
-      (layout.horiozntalOffet ?? 0) * 1,
+      (layout.horiozntalOffet ?? 0) * 1
   );
 
   const hiddenRightXValue = useDerivedValue(
     () =>
       edges.value.maxX +
       scaledElementLayout.value.width +
-      (layout.horiozntalOffet ?? 0) * 1,
+      (layout.horiozntalOffet ?? 0) * 1
   );
 
   const handlePanEnd = useCallback(
@@ -87,7 +87,7 @@ export const usePanGesture = () => {
       const velocityThreshold = 1700;
 
       const [isOverDraggedLeft, isOverDraggedRight] = checkOverDrag(
-        translationX.value,
+        translationX.value
       );
 
       if (isOverDraggedLeft) {
@@ -123,7 +123,7 @@ export const usePanGesture = () => {
       const clampedY = clamp(
         targetYWithVelocity,
         edges.value.minY,
-        edges.value.maxY,
+        edges.value.maxY
       );
 
       const targetXWithVelocity =
@@ -189,7 +189,7 @@ export const usePanGesture = () => {
       hiddenRightXValue.value,
       handleHideTansition,
       findNearestYEdge,
-    ],
+    ]
   );
 
   const pan = useMemo(() => {
@@ -202,7 +202,7 @@ export const usePanGesture = () => {
         prevTranslationY.value = translationY.value;
         isActive.value = true;
       })
-      .onUpdate(e => {
+      .onUpdate((e) => {
         if (disabled) {
           return;
         }
@@ -212,7 +212,7 @@ export const usePanGesture = () => {
         translationY.value = applyResistance(
           newTranslationY,
           edges.value.minY,
-          edges.value.maxY,
+          edges.value.maxY
         );
 
         const newTranslationX = prevTranslationX.value + e.translationX;
@@ -236,7 +236,7 @@ export const usePanGesture = () => {
 
         translationX.value = newTranslationX;
       })
-      .onEnd(event => {
+      .onEnd((event) => {
         if (disabled) {
           return;
         }

@@ -1,26 +1,26 @@
-import React from 'react';
 import { StyleSheet, type StyleProp, type ViewStyle } from 'react-native';
 import { BlurView } from 'expo-blur';
-import { useAnimatedStyle, withTiming } from 'react-native-reanimated';
+import Animated, {
+  useAnimatedStyle,
+  withTiming,
+} from 'react-native-reanimated';
 
-import { usePiPViewContext } from './PiPView.provider';
-import { AnimatedView } from '@/ui/StyledView/AnimatedView';
+import { usePiPViewContext } from '../context/PiPView.provider';
 
 interface Props {
   style?: StyleProp<ViewStyle>;
 }
 
 export const PiPViewBlurOverlay = ({ style }: Props) => {
-  const overDragSide = usePiPViewContext(state => state.overDragSide);
+  const overDragSide = usePiPViewContext((state) => state.overDragSide);
 
   const stylez = useAnimatedStyle(() => ({
     opacity: withTiming(overDragSide.value ? 1 : 0),
   }));
 
   return (
-    <AnimatedView
-      style={[style, StyleSheet.absoluteFillObject, stylez]}
-      zIndex={1000}
+    <Animated.View
+      style={[StyleSheet.absoluteFillObject, stylez, styles.container, style]}
     >
       <BlurView
         style={[StyleSheet.absoluteFillObject]}
@@ -28,6 +28,12 @@ export const PiPViewBlurOverlay = ({ style }: Props) => {
         tint="dark"
         experimentalBlurMethod="dimezisBlurView"
       />
-    </AnimatedView>
+    </Animated.View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    zIndex: 100,
+  },
+});

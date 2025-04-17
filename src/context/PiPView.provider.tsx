@@ -1,9 +1,9 @@
-import React, { useMemo, type PropsWithChildren } from 'react';
+import { useMemo, type PropsWithChildren } from 'react';
 import { type LayoutRectangle } from 'react-native';
 import { type SharedValue } from 'react-native-reanimated';
 import { createContext, useContextSelector } from 'use-context-selector';
 
-import { type Dimensions, type EdgeSide, type PiPViewProps } from './models';
+import { type Dimensions, type EdgeSide, type PiPViewProps } from '../models';
 
 type PiPViewContextType =
   | (PiPViewProps & {
@@ -51,17 +51,17 @@ export const PiPViewProvider = ({
 };
 
 export const usePiPViewContext = <Selected,>(
-  selector: (value: NonNullable<PiPViewContextType>) => Selected,
+  selector: (value: NonNullable<PiPViewContextType>) => Selected
 ): Selected => {
   return useContextSelector<PiPViewContextType, Selected>(
     PiPViewContext,
-    value => {
+    (value) => {
       if (value === null) {
         throw new Error(
-          'usePiPViewContext must be used within a PiPViewProvider',
+          'usePiPViewContext must be used within a PiPViewProvider'
         );
       }
       return selector(value);
-    },
+    }
   );
 };

@@ -5,6 +5,10 @@
 # XDE
 .expo/
 
+# Example
+example/android/
+example/ios/
+
 # VSCode
 .vscode/
 jsconfig.json
@@ -40,13 +44,6 @@ project.xcworkspace
 .settings
 local.properties
 android.iml
-
-# Cocoapods
-#
-example/ios/Pods
-
-# Ruby
-example/vendor/
 
 # node.js
 #
@@ -84,3 +81,4 @@ android/generated
 
 # React Native Nitro Modules
 nitrogen/
+

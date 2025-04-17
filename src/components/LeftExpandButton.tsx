@@ -1,10 +1,9 @@
-import React from 'react';
 import { useDerivedValue } from 'react-native-reanimated';
-import { createStyleSheet, useStyles } from 'react-native-unistyles';
 
-import { ARROW_WIDTH } from './constants';
+import { StyleSheet } from 'react-native';
+import { ARROW_WIDTH } from '../constants';
 import { ExpandButton } from './ExpandButton';
-import { usePiPViewContext } from './PiPView.provider';
+import { usePiPViewContext } from '../context/PiPView.provider';
 
 interface Props {
   onPress: () => void;
@@ -12,14 +11,13 @@ interface Props {
 
 export const LeftExpandButton = ({ onPress }: Props) => {
   const { dockSide, elementLayout, overDragSide } = usePiPViewContext(
-    state => ({
+    (state) => ({
       onPress: state.onPress,
       overDragSide: state.overDragSide,
       dockSide: state.dockSide,
       elementLayout: state.elementLayout,
-    }),
+    })
   );
-  const { styles } = useStyles(stylesheet);
   const translateX = useDerivedValue<number>(() => {
     switch (true) {
       case overDragSide.value === 'left':
@@ -32,7 +30,7 @@ export const LeftExpandButton = ({ onPress }: Props) => {
   });
 
   const isVisible = useDerivedValue(
-    () => overDragSide.value === 'left' || dockSide.value === 'left',
+    () => overDragSide.value === 'left' || dockSide.value === 'left'
   );
 
   return (
@@ -47,8 +45,8 @@ export const LeftExpandButton = ({ onPress }: Props) => {
   );
 };
 
-const stylesheet = createStyleSheet(() => ({
+const styles = StyleSheet.create({
   button: {
     right: 0,
   },
-}));
+});

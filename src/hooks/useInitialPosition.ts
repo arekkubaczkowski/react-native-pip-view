@@ -10,7 +10,7 @@ import {
   type DraggableElementInitialPosition,
   type Edges,
   type ScreenLayoutDimensions,
-} from './models';
+} from '../models';
 
 interface Options {
   edges: SharedValue<Edges | null>;
@@ -54,7 +54,7 @@ export const useInitialPosition = ({
           return 0;
       }
     },
-    [edges.value, layout.horiozntalOffet, layout.x],
+    [edges.value, layout.horiozntalOffet, layout.x]
   );
 
   const resolveYPosition = useCallback(
@@ -80,7 +80,7 @@ export const useInitialPosition = ({
           return 0;
       }
     },
-    [edges.value, layout.y],
+    [edges.value, layout.y]
   );
 
   const initials = useDerivedValue(() => {
@@ -118,7 +118,7 @@ export const useInitialPosition = ({
         prevTranslationX.value = initials.value.x;
         prevTranslationY.value = initials.value.y;
       }
-    },
+    }
   );
 
   return {

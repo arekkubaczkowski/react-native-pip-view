@@ -1,7 +1,6 @@
 import { useCallback } from 'react';
 import { clamp, useDerivedValue } from 'react-native-reanimated';
-
-import { usePiPViewContext } from './PiPView.provider';
+import { usePiPViewContext } from '../context/PiPView.provider';
 
 export const useDragHelpers = () => {
   const {
@@ -12,7 +11,7 @@ export const useDragHelpers = () => {
     overDragOffset,
     dockSide,
     destroyArea,
-  } = usePiPViewContext(state => ({
+  } = usePiPViewContext((state) => ({
     _providedEdges: state.edges,
     scaledElementLayout: state.scaledElementLayout,
     translationX: state.translationX,
@@ -29,7 +28,7 @@ export const useDragHelpers = () => {
         maxX: 0,
         minY: 0,
         maxY: 0,
-      },
+      }
   );
 
   const applyResistance = (offset: number, min: number, max: number) => {
@@ -59,7 +58,7 @@ export const useDragHelpers = () => {
 
       return [isOverDraggedLeft, isOverDraggedRight];
     },
-    [edges, hideable, overDragOffset],
+    [edges, hideable, overDragOffset]
   );
 
   const findNearestYEdge = useCallback(
@@ -68,7 +67,7 @@ export const useDragHelpers = () => {
       const midY = (edges.value.minY + edges.value.maxY) / 2;
       return y < midY ? edges.value.minY : edges.value.maxY;
     },
-    [edges],
+    [edges]
   );
 
   const isWithinhighlightArea = useCallback(
@@ -103,7 +102,7 @@ export const useDragHelpers = () => {
       destroyArea?.position,
       scaledElementLayout.value.height,
       scaledElementLayout.value.width,
-    ],
+    ]
   );
 
   const handleHideTansition = useCallback(
@@ -112,7 +111,7 @@ export const useDragHelpers = () => {
       translationX.value = clamp(
         targetX,
         edges.value.minX - scaledElementLayout.value.width - 50,
-        edges.value.maxX + scaledElementLayout.value.width + 50,
+        edges.value.maxX + scaledElementLayout.value.width + 50
       );
 
       dockSide.value = side;
@@ -123,7 +122,7 @@ export const useDragHelpers = () => {
       edges.value.minX,
       scaledElementLayout.value.width,
       translationX,
-    ],
+    ]
   );
 
   return {

@@ -1,11 +1,9 @@
-import React from 'react';
-import { type GestureResponderEvent } from 'react-native';
+import { StyleSheet, type GestureResponderEvent } from 'react-native';
 import { useDerivedValue } from 'react-native-reanimated';
-import { createStyleSheet, useStyles } from 'react-native-unistyles';
 
-import { ARROW_WIDTH } from './constants';
+import { ARROW_WIDTH } from '../constants';
 import { ExpandButton } from './ExpandButton';
-import { usePiPViewContext } from './PiPView.provider';
+import { usePiPViewContext } from '../context/PiPView.provider';
 
 interface Props {
   onPress: (event: GestureResponderEvent) => void;
@@ -13,13 +11,12 @@ interface Props {
 
 export const RightExpandButton = ({ onPress }: Props) => {
   const { dockSide, elementLayout, overDragSide } = usePiPViewContext(
-    state => ({
+    (state) => ({
       overDragSide: state.overDragSide,
       dockSide: state.dockSide,
       elementLayout: state.elementLayout,
-    }),
+    })
   );
-  const { styles } = useStyles(stylesheet);
 
   const translateX = useDerivedValue(() => {
     switch (true) {
@@ -33,7 +30,7 @@ export const RightExpandButton = ({ onPress }: Props) => {
   });
 
   const isVisible = useDerivedValue(
-    () => overDragSide.value === 'right' || dockSide.value === 'right',
+    () => overDragSide.value === 'right' || dockSide.value === 'right'
   );
 
   return (
@@ -48,8 +45,8 @@ export const RightExpandButton = ({ onPress }: Props) => {
   );
 };
 
-const stylesheet = createStyleSheet(() => ({
+const styles = StyleSheet.create({
   button: {
     left: 0,
   },
-}));
+});
