@@ -7,7 +7,7 @@
   "types": "lib/typescript/index.d.ts",
   "exports": {
     ".": {
-      "require": "./lib/commonjs/index.js",
+      "require": "./lib/module/index.js",
       "types": "./lib/typescript/src/index.d.ts"
     },
     "./package.json": "./package.json"
