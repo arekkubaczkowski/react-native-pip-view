@@ -4,7 +4,7 @@ import { type Dimensions, type ScreenLayoutDimensions } from './models';
 
 export const getEdges = (
   currentContainerLayout: ScreenLayoutDimensions,
-  currentScaledElementLayout: SharedValue<Dimensions>,
+  currentScaledElementLayout: SharedValue<Dimensions>
 ) => {
   'worklet';
 
