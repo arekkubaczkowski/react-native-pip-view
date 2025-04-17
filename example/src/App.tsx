@@ -29,7 +29,7 @@ export default function App() {
           height: height - 80,
           y: 100,
           x: 0,
-          horiozntalOffet: 12,
+          horizontalOffet: 12,
         }}
       >
         <View style={styles.placeholder} />

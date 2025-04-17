@@ -113,11 +113,11 @@ export const PiPViewImpl = ({ children }: PropsWithChildren) => {
   );
 
   const handleExpandView = useCallback(() => {
-    const minX = layout.horiozntalOffet ?? 0;
+    const minX = layout.horizontalOffet ?? 0;
     const maxX =
       layout.width -
       scaledElementLayout.value.width -
-      (layout.horiozntalOffet ?? 0);
+      (layout.horizontalOffet ?? 0);
 
     const targetX = dockSide.value === 'left' ? minX : maxX;
     translationX.value = targetX;
@@ -129,7 +129,7 @@ export const PiPViewImpl = ({ children }: PropsWithChildren) => {
     dockSide.value = null;
     dockSide.value = null;
   }, [
-    layout.horiozntalOffet,
+    layout.horizontalOffet,
     layout.width,
     scaledElementLayout.value.width,
     dockSide,

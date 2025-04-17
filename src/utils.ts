@@ -11,16 +11,16 @@ export const getEdges = (
   return {
     minY: currentContainerLayout.y ?? 0,
     minX:
-      (currentContainerLayout.horiozntalOffet ?? 0) +
+      (currentContainerLayout.horizontalOffet ?? 0) +
       (currentContainerLayout.x ?? 0),
 
     maxX:
       currentContainerLayout.width -
       currentScaledElementLayout.value.width -
-      (currentContainerLayout.horiozntalOffet ?? 0),
+      (currentContainerLayout.horizontalOffet ?? 0),
     maxY:
       currentContainerLayout.height -
       currentScaledElementLayout.value.height -
-      (currentContainerLayout.horiozntalOffet ?? 0),
+      (currentContainerLayout.horizontalOffet ?? 0),
   };
 };

@@ -35,7 +35,7 @@ export const useInitialPosition = ({
       'worklet';
       if (isNumberValue(position)) {
         const positionWithinContainer =
-          position + (layout.x || 0) + (layout.horiozntalOffet ?? 0);
+          position + (layout.x || 0) + (layout.horizontalOffet ?? 0);
         return positionWithinContainer;
       }
 
@@ -54,7 +54,7 @@ export const useInitialPosition = ({
           return 0;
       }
     },
-    [edges.value, layout.horiozntalOffet, layout.x]
+    [edges.value, layout.horizontalOffet, layout.x]
   );
 
   const resolveYPosition = useCallback(

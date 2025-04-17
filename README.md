@@ -57,7 +57,7 @@ export default function App() {
         height: height - 80,
         y: 100,
         x: 0,
-        horiozntalOffet: 12,
+        horizontalOffet: 12,
       }}
     >
       <View style={{ width: 120, height: 80, backgroundColor: 'gray' }} />
@@ -103,7 +103,7 @@ interface DestroyArea {
 ### 📐 `ScreenLayoutDimensions`
 
 > ⚠️ **Important:** If you enable `snapToEdges`, make sure the `layout.width` matches the full screen width. This ensures the PiP view can properly align with screen edges.
-> You can also use the optional `horiozntalOffet` prop to add padding between the PiP view and the screen edge after snapping. This helps prevent the PiP from being flush against the edge.
+> You can also use the optional `horizontalOffet` prop to add padding between the PiP view and the screen edge after snapping. This helps prevent the PiP from being flush against the edge.
 
 ```ts
 interface ScreenLayoutDimensions {
@@ -111,7 +111,7 @@ interface ScreenLayoutDimensions {
   y: number;
   width: number;
   height: number;
-  horiozntalOffet?: number;
+  horizontalOffet?: number;
 }
 ```
 

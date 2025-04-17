@@ -68,14 +68,14 @@ export const usePanGesture = () => {
     () =>
       edges.value.minX -
       scaledElementLayout.value.width -
-      (layout.horiozntalOffet ?? 0) * 1
+      (layout.horizontalOffet ?? 0) * 1
   );
 
   const hiddenRightXValue = useDerivedValue(
     () =>
       edges.value.maxX +
       scaledElementLayout.value.width +
-      (layout.horiozntalOffet ?? 0) * 1
+      (layout.horizontalOffet ?? 0) * 1
   );
 
   const handlePanEnd = useCallback(

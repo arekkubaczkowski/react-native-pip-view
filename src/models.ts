@@ -31,7 +31,7 @@ export type DestroyArea = {
 };
 
 export type ScreenLayoutDimensions = ContainerLayoutRectangle & {
-  horiozntalOffet?: number;
+  horizontalOffet?: number;
 };
 
 export interface PiPViewProps {
