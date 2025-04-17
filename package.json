@@ -57,11 +57,15 @@
     "react": "18.3.1",
     "react-native": "0.76.9",
     "react-native-builder-bob": "^0.40.6",
+    "react-native-reanimated": "^3.17.4",
+    "react-native-gesture-handler": "^2.25.0",
     "release-it": "^17.10.0",
     "typescript": "^5.2.2"
   },
   "peerDependencies": {
     "react": "*",
+    "react-native-reanimated": ">=3.0.0",
+    "react-native-gesture-handler": ">=2.0.0",
     "react-native": "*"
   },
   "workspaces": [
@@ -122,8 +126,6 @@
   "dependencies": {
     "@react-native-community/cli": "^18.0.0",
     "expo-blur": "^14.0.3",
-    "react-native-gesture-handler": "^2.25.0",
-    "react-native-reanimated": "^3.17.4",
     "react-native-svg": "^15.11.2",
     "use-context-selector": "^2.0.0"
   }
