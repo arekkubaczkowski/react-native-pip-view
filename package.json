@@ -4,10 +4,11 @@
   "description": "Custom PiP View component",
   "source": "./src/index.tsx",
   "main": "lib/commonjs/index.js",
-  "types": "lib/typescript/index.d.ts",
+  "types": "lib/typescript/src/index.d.ts",
   "files": [
     "src",
-    "lib"
+    "lib/typescript",
+    "lib/commonjs"
   ],
   "scripts": {
     "example": "yarn workspace react-native-pip-view-example",
