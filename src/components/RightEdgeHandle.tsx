@@ -38,7 +38,7 @@ export const RightEdgeHandle = ({ onPress }: Props) => {
       isVisible={isVisible}
       translateX={translateX}
       onPress={onPress}
-      side="right"
+      side="left"
     />
   );
 };

@@ -12,7 +12,7 @@ export const PiPView = ({
   children,
   ...props
 }: PropsWithChildren<PiPViewProps>) => {
-  const { layout, initialPosition, onDestroy } = props;
+  const { layout, initialPosition, onDestroy, edgeHandle } = props;
 
   const dockSide = useSharedValue<EdgeSide | null>(null);
 
@@ -22,13 +22,24 @@ export const PiPView = ({
     x: 0,
     y: 0,
   });
-  const isInitialized = useDerivedValue(
-    () => elementLayout.value.width > 0 && elementLayout.value.height > 0
-  );
 
   const edgeHandleLayout = useSharedValue({
     width: 0,
     height: 0,
+  });
+
+  const isInitialized = useDerivedValue(() => {
+    console.log('🚀 ~ isInitialized ~ edgeHandleLayout:', edgeHandleLayout);
+
+    const isEdgeHandleInitialized = edgeHandle
+      ? edgeHandleLayout.value.width > 0 && edgeHandleLayout.value.height > 0
+      : true;
+
+    return (
+      elementLayout.value.width > 0 &&
+      elementLayout.value.height > 0 &&
+      isEdgeHandleInitialized
+    );
   });
 
   const isPanActive = useSharedValue(false);

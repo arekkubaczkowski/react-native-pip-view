@@ -70,24 +70,23 @@ export default function App() {
 
 ## 🧩 Props
 
-| Prop              | Type                        | Description                                                                     |
-| ----------------- | --------------------------- | ------------------------------------------------------------------------------- |
-| `disabled`        | `boolean`                   | Disables dragging and interactions when `true`.                                 |
-| `destroyArea`     | `DestroyArea`               | An optional area where the PiP can be dragged to close.                         |
-| `initialPosition` | `{ x: number; y: number; }` | Optional initial x/y position of the PiP view within provided layout dimensions |
-| `hideable`        | `boolean`                   | Enables auto-hiding near screen edge.                                           |
-| `layout`          | `ScreenLayoutDimensions`    | Defines available movement area. Required.                                      |
-| `snapToEdges`     | `boolean`                   | Automatically snaps the PiP to the nearest screen edge.                         |
-| `onDestroy`       | `() => void`                | Callback triggered when PiP is dropped in the destroy area.                     |
-| `onPress`         | `() => void`                | Callback triggered on PiP tap.                                                  |
-
----
+| Prop              | Type                                           | Description                                                                        |
+| ----------------- | ---------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `disabled`        | `boolean`                                      | Disables dragging and interactions when `true`.                                    |
+| `destroyArea`     | `DestroyArea`                                  | An optional area where the PiP can be dragged to close.                            |
+| `initialPosition` | `{ x: number; y: number; }`                    | Optional initial x/y position of the PiP view within provided layout dimensions.   |
+| `hideable`        | `boolean`                                      | Enables auto-hiding near screen edge.                                              |
+| `layout`          | `ScreenLayoutDimensions`                       | Defines available movement area. **Required.**                                     |
+| `snapToEdges`     | `boolean`                                      | Automatically snaps the PiP to the nearest screen edge.                            |
+| `onDestroy`       | `() => void`                                   | Callback triggered when PiP is dropped in the destroy area.                        |
+| `onPress`         | `() => void`                                   | Callback triggered on PiP tap.                                                     |
+| `edgeHandle`      | `{ left: ReactElement; right: ReactElement; }` | Customizable left and right handles that appear when the PiP is hidden off-screen. |
 
 ### 🔻 `DestroyArea`
 
 ```ts
 interface DestroyArea {
-  position: {
+  layout: {
     x: number;
     y: number;
     width: number;

@@ -1,35 +1,47 @@
 import Animated, {
   useAnimatedStyle,
   withTiming,
-  type SharedValue,
 } from 'react-native-reanimated';
 
+import { StyleSheet, type LayoutChangeEvent } from 'react-native';
 import { usePiPViewContext } from '../context/PiPView.provider';
 import { type EdgeSide } from '../models';
-import type { LayoutChangeEvent } from 'react-native';
 
 interface Props {
-  isVisible: SharedValue<boolean>;
   side: EdgeSide;
 }
 
-export const CustomEdgeHandle = ({ isVisible, side }: Props) => {
-  const { edgeHandle, edgeHandleLayout } = usePiPViewContext((state) => ({
-    edgeHandle: state.edgeHandle,
-    edgeHandleLayout: state.edgeHandleLayout,
-  }));
+export const CustomEdgeHandle = ({ side }: Props) => {
+  const { edgeHandle, edgeHandleLayout, elementLayout } = usePiPViewContext(
+    (state) => ({
+      edgeHandle: state.edgeHandle,
+      edgeHandleLayout: state.edgeHandleLayout,
+      elementLayout: state.elementLayout,
+    })
+  );
 
   const leftHandleStyle = useAnimatedStyle(() => ({
-    opacity: withTiming(isVisible.value && side === 'left' ? 1 : 0),
+    opacity: withTiming(side === 'left' ? 1 : 0),
+    transform: [
+      {
+        translateY:
+          (elementLayout.value.height - edgeHandleLayout.value.height) / 2,
+      },
+    ],
+    left: 0,
   }));
   const rightHandleStyle = useAnimatedStyle(() => ({
-    opacity: withTiming(isVisible.value && side === 'right' ? 1 : 0),
+    opacity: withTiming(side === 'right' ? 1 : 0),
+    transform: [
+      {
+        translateY:
+          (elementLayout.value.height - edgeHandleLayout.value.height) / 2,
+      },
+    ],
+    right: 0,
   }));
 
   const onLayoutLeftHandle = (event: LayoutChangeEvent) => {
-    if (edgeHandleLayout.value.width || edgeHandleLayout.value.height) {
-      return;
-    }
     edgeHandleLayout.value = {
       width: event.nativeEvent.layout.width,
       height: event.nativeEvent.layout.height,
@@ -37,9 +49,6 @@ export const CustomEdgeHandle = ({ isVisible, side }: Props) => {
   };
 
   const onLayoutRightHandle = (event: LayoutChangeEvent) => {
-    if (edgeHandleLayout.value.width || edgeHandleLayout.value.height) {
-      return;
-    }
     edgeHandleLayout.value = {
       width: event.nativeEvent.layout.width,
       height: event.nativeEvent.layout.height,
@@ -52,12 +61,27 @@ export const CustomEdgeHandle = ({ isVisible, side }: Props) => {
 
   return (
     <>
-      <Animated.View onLayout={onLayoutLeftHandle} style={leftHandleStyle}>
+      <Animated.View
+        onLayout={onLayoutLeftHandle}
+        style={[leftHandleStyle, styles.handle]}
+      >
         {edgeHandle.left}
       </Animated.View>
-      <Animated.View onLayout={onLayoutRightHandle} style={rightHandleStyle}>
+      <Animated.View
+        onLayout={onLayoutRightHandle}
+        style={[rightHandleStyle, styles.handle]}
+      >
         {edgeHandle.right}
       </Animated.View>
     </>
   );
 };
+
+const styles = StyleSheet.create({
+  handle: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    zIndex: -1,
+  },
+});

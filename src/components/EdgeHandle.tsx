@@ -54,11 +54,11 @@ export const EdgeHandle = ({
 
   return (
     <Animated.View style={[containerStyle, style, styles.button]}>
-      <TouchableOpacity onPress={onPress}>
+      <TouchableOpacity onPress={onPress} style={styles.grow}>
         {edgeHandle?.left && edgeHandle.right ? (
-          <CustomEdgeHandle side={side} isVisible={isVisible} />
+          <CustomEdgeHandle side={side} />
         ) : (
-          <ArrowButton side={side} isVisible={isVisible} />
+          <ArrowButton side={side} />
         )}
       </TouchableOpacity>
     </Animated.View>
@@ -68,6 +68,9 @@ export const EdgeHandle = ({
 const styles = StyleSheet.create({
   button: {
     position: 'absolute',
+  },
+  grow: {
+    flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'flex-start',
   },

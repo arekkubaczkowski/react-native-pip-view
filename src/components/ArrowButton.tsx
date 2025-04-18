@@ -1,62 +1,49 @@
-import { BlurView } from 'expo-blur';
-import {
-  Platform,
-  StyleSheet,
-  View,
-  type LayoutChangeEvent,
-} from 'react-native';
+import { StyleSheet, type LayoutChangeEvent } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   withTiming,
-  type SharedValue,
 } from 'react-native-reanimated';
 
+import { usePiPViewContext } from '../context/PiPView.provider';
 import { type EdgeSide } from '../models';
 import { ArrowLeftIcon } from './ArrowLeftIcon';
 import { ArrowRightIcon } from './ArrowRightIcon';
-import { usePiPViewContext } from '../context/PiPView.provider';
 
 interface Props {
-  isVisible: SharedValue<boolean>;
   side: EdgeSide | null;
 }
 
-export const ArrowButton = ({ isVisible, side }: Props) => {
+export const ArrowButton = ({ side }: Props) => {
   const { edgeHandleLayout, edgeHandle } = usePiPViewContext((state) => ({
     edgeHandleLayout: state.edgeHandleLayout,
     edgeHandle: state.edgeHandle,
   }));
 
   const containerStyles = useAnimatedStyle(() => ({
-    borderTopRightRadius: side === 'left' ? 4 : 0,
-    borderBottomRightRadius: side === 'left' ? 4 : 0,
-    borderTopLeftRadius: side === 'right' ? 4 : 0,
-    borderBottomLeftRadius: side === 'right' ? 4 : 0,
-    width: edgeHandleLayout.value.width,
-    height: edgeHandleLayout.value.height,
+    borderTopRightRadius: side === 'right' ? 8 : 0,
+    borderBottomRightRadius: side === 'right' ? 8 : 0,
+    borderTopLeftRadius: side === 'left' ? 8 : 0,
+    borderBottomLeftRadius: side === 'left' ? 8 : 0,
   }));
 
   const leftArrowStyle = useAnimatedStyle(() => ({
-    opacity: withTiming(isVisible.value && side === 'left' ? 1 : 0),
-    width: edgeHandleLayout.value.width,
-    height: edgeHandleLayout.value.height,
+    opacity: withTiming(side === 'left' ? 1 : 0),
   }));
 
   const rightArrowStyle = useAnimatedStyle(() => ({
-    opacity: withTiming(isVisible.value && side === 'right' ? 1 : 0),
-    width: edgeHandleLayout.value.width,
-    height: edgeHandleLayout.value.height,
+    opacity: withTiming(side === 'right' ? 1 : 0),
   }));
 
   const onLayout = (event: LayoutChangeEvent) => {
     if (
-      edgeHandleLayout.value.width ||
-      edgeHandleLayout.value.height ||
+      edgeHandleLayout.value.width > 0 ||
+      edgeHandleLayout.value.height > 0 ||
       edgeHandle?.left ||
       edgeHandle?.right
     ) {
       return;
     }
+
     edgeHandleLayout.value = {
       width: event.nativeEvent.layout.width,
       height: event.nativeEvent.layout.height,
@@ -65,28 +52,18 @@ export const ArrowButton = ({ isVisible, side }: Props) => {
 
   return (
     <Animated.View style={[containerStyles, styles.container]}>
-      {Platform.OS === 'ios' ? (
-        <BlurView
-          tint="light"
-          style={StyleSheet.absoluteFillObject}
-          intensity={28}
-        />
-      ) : (
-        <View style={[StyleSheet.absoluteFillObject, styles.overlay]} />
-      )}
-
       <Animated.View
         onLayout={onLayout}
-        style={[leftArrowStyle, styles.leftArrow]}
+        style={[leftArrowStyle, styles.arrow, styles.leftArrow]}
       >
-        <ArrowLeftIcon />
+        <ArrowLeftIcon width={16} height={16} />
       </Animated.View>
 
       <Animated.View
         onLayout={onLayout}
-        style={[rightArrowStyle, styles.rightArrow]}
+        style={[rightArrowStyle, styles.arrow, styles.rightArrow]}
       >
-        <ArrowRightIcon />
+        <ArrowRightIcon width={16} height={16} />
       </Animated.View>
     </Animated.View>
   );
@@ -94,10 +71,12 @@ export const ArrowButton = ({ isVisible, side }: Props) => {
 
 const styles = StyleSheet.create({
   container: {
+    alignItems: 'center',
     overflow: 'hidden',
-  },
-  overlay: {
-    backgroundColor: '#FFFFFF40',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    width: 24,
+    height: 64,
   },
   leftArrow: {
     left: 0,
@@ -106,7 +85,8 @@ const styles = StyleSheet.create({
     right: 0,
   },
   arrow: {
-    justifyContent: 'center',
+    position: 'absolute',
+    width: 24,
     alignItems: 'center',
   },
 });

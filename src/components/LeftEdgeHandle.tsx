@@ -39,7 +39,7 @@ export const LeftEdgeHandle = ({ onPress }: Props) => {
       style={styles.button}
       isVisible={isVisible}
       translateX={translateX}
-      side="left"
+      side="right"
       onPress={onPress}
     />
   );
