@@ -26,7 +26,12 @@ export const PiPView = ({
     () => elementLayout.value.width > 0 && elementLayout.value.height > 0
   );
 
-  const isActive = useSharedValue(false);
+  const edgeHandleLayout = useSharedValue({
+    width: 0,
+    height: 0,
+  });
+
+  const isPanActive = useSharedValue(false);
   const isHighlightAreaActive = useSharedValue(false);
   const isDestroyed = useSharedValue(false);
 
@@ -76,13 +81,14 @@ export const PiPView = ({
       scale,
       elementLayout,
       scaledElementLayout,
-      isActive,
+      isPanActive,
       isHighlightAreaActive,
       isDestroyed,
       isInitialized,
       edges,
       overDragOffset,
       handleDestroy,
+      edgeHandleLayout,
       ...positionValues,
       ...props,
     }),
@@ -91,7 +97,7 @@ export const PiPView = ({
       overDragSide,
       scale,
       elementLayout,
-      isActive,
+      isPanActive,
       overDragOffset,
       handleDestroy,
       isHighlightAreaActive,
@@ -99,6 +105,7 @@ export const PiPView = ({
       isDestroyed,
       positionValues,
       isInitialized,
+      edgeHandleLayout,
       edges,
       props,
     ]

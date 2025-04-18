@@ -70,22 +70,22 @@ export const useDragHelpers = () => {
     [edges]
   );
 
-  const isWithinhighlightArea = useCallback(
+  const isWithinHighlightArea = useCallback(
     (x: number, y: number) => {
       'worklet';
-      if (destroyArea?.position) {
+      if (destroyArea?.layout) {
         const draggableLeft = x;
         const draggableRight = x + scaledElementLayout.value.width;
         const draggableTop = y;
         const draggableBottom = y + scaledElementLayout.value.height;
 
         // Coordinates and dimensions of the highlighted area
-        const highlightedLeft = destroyArea.position.x ?? 0;
+        const highlightedLeft = destroyArea.layout.x ?? 0;
         const highlightedRight =
-          (destroyArea.position.x ?? 0) + destroyArea.position.width;
-        const highlightedTop = destroyArea.position.y ?? 0;
+          (destroyArea.layout.x ?? 0) + destroyArea.layout.width;
+        const highlightedTop = destroyArea.layout.y ?? 0;
         const highlightedBottom =
-          (destroyArea.position.y ?? 0) + destroyArea.position.height;
+          (destroyArea.layout.y ?? 0) + destroyArea.layout.height;
 
         // Check for overlap
         const isOverlapping =
@@ -99,7 +99,7 @@ export const useDragHelpers = () => {
       return false;
     },
     [
-      destroyArea?.position,
+      destroyArea?.layout,
       scaledElementLayout.value.height,
       scaledElementLayout.value.width,
     ]
@@ -127,7 +127,7 @@ export const useDragHelpers = () => {
 
   return {
     handleHideTansition,
-    isWithinhighlightArea,
+    isWithinHighlightArea,
     findNearestYEdge,
     checkOverDrag,
     applyResistance,

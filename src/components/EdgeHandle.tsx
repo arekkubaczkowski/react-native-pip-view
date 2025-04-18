@@ -2,7 +2,6 @@ import {
   StyleSheet,
   TouchableOpacity,
   type GestureResponderEvent,
-  type LayoutRectangle,
   type StyleProp,
   type ViewStyle,
 } from 'react-native';
@@ -13,32 +12,36 @@ import Animated, {
   type SharedValue,
 } from 'react-native-reanimated';
 
-import { ArrowButton } from './ArrowButton';
+import { animationsPresets } from '../constants';
+import { usePiPViewContext } from '../context/PiPView.provider';
 import { type EdgeSide } from '../models';
-import { customAnimations } from '../constants';
+import { ArrowButton } from './ArrowButton';
+import { CustomEdgeHandle } from './CustomEdgeHandle';
 
 interface Props {
   translateX: SharedValue<number>;
-  elementLayout: SharedValue<LayoutRectangle>;
   isVisible: SharedValue<boolean>;
   onPress: (event: GestureResponderEvent) => void;
   style?: StyleProp<ViewStyle>;
   side: EdgeSide;
 }
 
-export const ExpandButton = ({
-  elementLayout,
+export const EdgeHandle = ({
   onPress,
   translateX,
   isVisible,
   style,
   side,
 }: Props) => {
+  const { edgeHandle, elementLayout } = usePiPViewContext((state) => ({
+    edgeHandle: state.edgeHandle,
+    elementLayout: state.elementLayout,
+  }));
   const containerStyle = useAnimatedStyle(() => ({
     height: elementLayout.value.height,
     transform: [
       {
-        translateX: withSpring(translateX.value, customAnimations.lazy),
+        translateX: withSpring(translateX.value, animationsPresets.lazy),
       },
     ],
     opacity: withTiming(isVisible.value ? 1 : 0, {
@@ -52,7 +55,11 @@ export const ExpandButton = ({
   return (
     <Animated.View style={[containerStyle, style, styles.button]}>
       <TouchableOpacity onPress={onPress}>
-        <ArrowButton side={side} isVisible={isVisible} />
+        {edgeHandle?.left && edgeHandle.right ? (
+          <CustomEdgeHandle side={side} isVisible={isVisible} />
+        ) : (
+          <ArrowButton side={side} isVisible={isVisible} />
+        )}
       </TouchableOpacity>
     </Animated.View>
   );

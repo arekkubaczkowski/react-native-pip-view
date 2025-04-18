@@ -1,9 +1,6 @@
 import type { WithSpringConfig } from 'react-native-reanimated';
 
-export const ARROW_WIDTH = 24;
-export const ARROW_HEIGHT = 84;
-
-export const customAnimations = {
+export const animationsPresets = {
   responsiveSpring: {
     damping: 80,
     stiffness: 200,

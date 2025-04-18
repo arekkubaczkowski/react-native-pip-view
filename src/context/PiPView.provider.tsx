@@ -18,13 +18,14 @@ type PiPViewContextType =
       prevTranslationX: SharedValue<number>;
       prevTranslationY: SharedValue<number>;
 
-      isActive: SharedValue<boolean>;
+      isPanActive: SharedValue<boolean>;
       isDestroyed: SharedValue<boolean>;
       isHighlightAreaActive: SharedValue<boolean>;
 
       isInitialized: SharedValue<boolean>;
       overDragOffset: SharedValue<number>;
       handleDestroy: () => void;
+      edgeHandleLayout: SharedValue<Dimensions>;
 
       edges: SharedValue<{
         minX: number;

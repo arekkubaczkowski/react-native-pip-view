@@ -1,3 +1,4 @@
+import type { ReactElement } from 'react';
 import { type LayoutRectangle } from 'react-native';
 
 export type DraggableElementInitialPosition = {
@@ -25,7 +26,7 @@ export type ContainerLayoutRectangle = Omit<LayoutRectangle, 'x' | 'y'> & {
 };
 
 export type DestroyArea = {
-  position: ContainerLayoutRectangle;
+  layout: ContainerLayoutRectangle;
   activeColor: string;
   inactiveColor: string;
 };
@@ -41,6 +42,10 @@ export interface PiPViewProps {
   hideable?: boolean;
   layout: ScreenLayoutDimensions;
   snapToEdges?: boolean;
+  edgeHandle?: {
+    left: ReactElement;
+    right: ReactElement;
+  };
   onDestroy?: () => void;
   onPress?: () => void;
 }

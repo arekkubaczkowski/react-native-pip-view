@@ -11,11 +11,11 @@ import Animated, {
   type SharedValue,
 } from 'react-native-reanimated';
 
-import { ARROW_WIDTH, customAnimations } from '../constants';
-import { LeftExpandButton } from './LeftExpandButton';
+import { animationsPresets } from '../constants';
+import { LeftEdgeHandle } from './LeftEdgeHandle';
 import { type ContainerLayoutRectangle, type Dimensions } from '../models';
 import { usePiPViewContext } from '../context/PiPView.provider';
-import { RightExpandButton } from './RightExpandButton';
+import { RightEdgeHandle } from './RightEdgeHandle';
 import { getEdges } from '../utils';
 import { usePanGesture } from '../hooks/usePanGesture';
 import { usePinchGesture } from '../hooks/usePinchGesture';
@@ -34,10 +34,11 @@ export const PiPViewImpl = ({ children }: PropsWithChildren) => {
     edges,
     overDragSide,
     isHighlightAreaActive,
-    isActive,
+    isPanActive,
     onPress,
     scale,
     destroyArea,
+    edgeHandleLayout,
   } = usePiPViewContext((state) => ({
     elementLayout: state.elementLayout,
     overDragSide: state.overDragSide,
@@ -54,8 +55,9 @@ export const PiPViewImpl = ({ children }: PropsWithChildren) => {
     dockSide: state.dockSide,
     isHighlightAreaActive: state.isHighlightAreaActive,
     onPress: state.onPress,
-    isActive: state.isActive,
+    isPanActive: state.isPanActive,
     scale: state.scale,
+    edgeHandleLayout: state.edgeHandleLayout,
   }));
 
   const handleLayoutChange = useCallback(
@@ -127,7 +129,6 @@ export const PiPViewImpl = ({ children }: PropsWithChildren) => {
 
     overDragSide.value = null;
     dockSide.value = null;
-    dockSide.value = null;
   }, [
     layout.horizontalOffet,
     layout.width,
@@ -187,29 +188,37 @@ export const PiPViewImpl = ({ children }: PropsWithChildren) => {
       }
     };
 
-    const overDragOffsetX =
-      overDragSide.value === null || !!dockSide.value
-        ? 0
-        : overDragSide.value === 'left'
-          ? -ARROW_WIDTH
-          : ARROW_WIDTH;
+    const getExtraOffsetX = () => {
+      switch (true) {
+        case overDragSide.value === null || !!dockSide.value:
+          return 0;
+        case overDragSide.value === 'left':
+          return -edgeHandleLayout.value.width;
+        case overDragSide.value === 'right':
+          return edgeHandleLayout.value.width;
+        default:
+          return 0;
+      }
+    };
+
+    const extraOverDragOffsetX = getExtraOffsetX();
 
     return {
       transform: [
         {
           translateX: withSpring(
-            translationX.value + offsetX.value + overDragOffsetX,
-            customAnimations.lazy
+            translationX.value + offsetX.value + extraOverDragOffsetX,
+            animationsPresets.lazy
           ),
         },
         {
           translateY: withSpring(
             translationY.value + offsetY.value,
-            customAnimations.lazy
+            animationsPresets.lazy
           ),
         },
         {
-          scale: withSpring(scale.value, customAnimations.softLanding),
+          scale: withSpring(scale.value, animationsPresets.softLanding),
         },
         {
           scale: isDestroyed.value
@@ -224,27 +233,30 @@ export const PiPViewImpl = ({ children }: PropsWithChildren) => {
   });
 
   const destroyAreaStyle = useAnimatedStyle(() => {
-    const active = isActive.value && !dockSide.value;
+    const active = isPanActive.value && !dockSide.value;
     return {
       opacity: 1,
       backgroundColor: withTiming(
         isHighlightAreaActive.value
-          ? destroyArea?.activeColor!
+          ? destroyArea?.activeColor || 'rgba(255, 255, 255, 0.15)'
           : active
-            ? destroyArea?.inactiveColor!
+            ? destroyArea?.inactiveColor || 'rgba(255, 255, 255, 0.05)'
             : 'transparent'
       ),
-      height: destroyArea?.position.height,
-      width: destroyArea?.position.width,
-      top: destroyArea?.position.y,
-      left: destroyArea?.position.x,
+      height: destroyArea?.layout.height,
+      width: destroyArea?.layout.width,
+      top: destroyArea?.layout.y,
+      left: destroyArea?.layout.x,
     };
   });
 
   const containerStyles = useAnimatedStyle(() => ({
     opacity: withDelay(
       200,
-      withSpring(isInitialized.value ? 1 : 0, customAnimations.responsiveSpring)
+      withSpring(
+        isInitialized.value ? 1 : 0,
+        animationsPresets.responsiveSpring
+      )
     ),
   }));
 
@@ -263,8 +275,8 @@ export const PiPViewImpl = ({ children }: PropsWithChildren) => {
             >
               {children}
 
-              <LeftExpandButton onPress={handleExpandView} />
-              <RightExpandButton onPress={handleExpandView} />
+              <LeftEdgeHandle onPress={handleExpandView} />
+              <RightEdgeHandle onPress={handleExpandView} />
             </Animated.View>
           </Animated.View>
         </GestureDetector>

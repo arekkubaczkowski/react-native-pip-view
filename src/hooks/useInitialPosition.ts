@@ -92,14 +92,7 @@ export const useInitialPosition = ({
       x: resolveXPosition(initialPosition?.x),
       y: resolveYPosition(initialPosition?.y),
     };
-  }, [
-    isInitialized.value,
-    edges.value,
-    resolveXPosition,
-    initialPosition?.x,
-    initialPosition?.y,
-    resolveYPosition,
-  ]);
+  });
 
   const translationX = useSharedValue(0);
   const translationY = useSharedValue(0);
@@ -111,12 +104,12 @@ export const useInitialPosition = ({
       initialized: isInitialized.value,
       initialValues: initials.value,
     }),
-    ({ initialized }, prev) => {
-      if (initials.value && initialized && prev?.initialized !== initialized) {
-        translationX.value = initials.value.x;
-        translationY.value = initials.value.y;
-        prevTranslationX.value = initials.value.x;
-        prevTranslationY.value = initials.value.y;
+    ({ initialized, initialValues }, prev) => {
+      if (initialValues && initialized && prev?.initialized !== initialized) {
+        translationX.value = initialValues.x;
+        translationY.value = initialValues.y;
+        prevTranslationX.value = initialValues.x;
+        prevTranslationY.value = initialValues.y;
       }
     }
   );

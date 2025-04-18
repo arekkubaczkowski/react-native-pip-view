@@ -1,29 +1,30 @@
 import { useDerivedValue } from 'react-native-reanimated';
 
 import { StyleSheet } from 'react-native';
-import { ARROW_WIDTH } from '../constants';
-import { ExpandButton } from './ExpandButton';
 import { usePiPViewContext } from '../context/PiPView.provider';
+import { EdgeHandle } from './EdgeHandle';
 
 interface Props {
   onPress: () => void;
 }
 
-export const LeftExpandButton = ({ onPress }: Props) => {
-  const { dockSide, elementLayout, overDragSide } = usePiPViewContext(
+export const LeftEdgeHandle = ({ onPress }: Props) => {
+  const { dockSide, overDragSide, edgeHandleLayout } = usePiPViewContext(
     (state) => ({
       onPress: state.onPress,
       overDragSide: state.overDragSide,
       dockSide: state.dockSide,
       elementLayout: state.elementLayout,
+      edgeHandleLayout: state.edgeHandleLayout,
     })
   );
+
   const translateX = useDerivedValue<number>(() => {
     switch (true) {
       case overDragSide.value === 'left':
-        return ARROW_WIDTH;
+        return edgeHandleLayout.value.width;
       case dockSide.value === 'left':
-        return ARROW_WIDTH;
+        return edgeHandleLayout.value.width;
       default:
         return 0;
     }
@@ -34,9 +35,8 @@ export const LeftExpandButton = ({ onPress }: Props) => {
   );
 
   return (
-    <ExpandButton
+    <EdgeHandle
       style={styles.button}
-      elementLayout={elementLayout}
       isVisible={isVisible}
       translateX={translateX}
       side="left"

@@ -22,7 +22,7 @@ export const usePanGesture = () => {
     translationX,
     translationY,
     overDragSide,
-    isActive,
+    isPanActive,
     isHighlightAreaActive,
     layout,
     disabled,
@@ -38,7 +38,7 @@ export const usePanGesture = () => {
     hideable: state.hideable,
     translationY: state.translationY,
     overDragSide: state.overDragSide,
-    isActive: state.isActive,
+    isPanActive: state.isPanActive,
     isHighlightAreaActive: state.isHighlightAreaActive,
     layout: state.layout,
     disabled: state.disabled,
@@ -61,7 +61,7 @@ export const usePanGesture = () => {
     checkOverDrag,
     findNearestYEdge,
     handleHideTansition,
-    isWithinhighlightArea,
+    isWithinHighlightArea,
   } = useDragHelpers();
 
   const hiddenLeftXValue = useDerivedValue(
@@ -94,7 +94,7 @@ export const usePanGesture = () => {
         translationX.value = hiddenLeftXValue.value;
         dockSide.value = 'left';
 
-        isActive.value = false;
+        isPanActive.value = false;
         isHighlightAreaActive.value = false;
         overDragSide.value = null;
 
@@ -107,7 +107,7 @@ export const usePanGesture = () => {
         translationX.value = hiddenRightXValue.value;
         dockSide.value = 'right';
 
-        isActive.value = false;
+        isPanActive.value = false;
         isHighlightAreaActive.value = false;
         overDragSide.value = null;
 
@@ -165,7 +165,7 @@ export const usePanGesture = () => {
       } else {
         translationY.value = clampedY;
       }
-      isActive.value = false;
+      isPanActive.value = false;
       isHighlightAreaActive.value = false;
       overDragSide.value = null;
     },
@@ -182,7 +182,7 @@ export const usePanGesture = () => {
       hideable,
       dockSide,
       snapToEdges,
-      isActive,
+      isPanActive,
       isHighlightAreaActive,
       overDragSide,
       hiddenLeftXValue.value,
@@ -200,7 +200,7 @@ export const usePanGesture = () => {
         }
         prevTranslationX.value = translationX.value;
         prevTranslationY.value = translationY.value;
-        isActive.value = true;
+        isPanActive.value = true;
       })
       .onUpdate((e) => {
         if (disabled) {
@@ -217,7 +217,7 @@ export const usePanGesture = () => {
 
         const newTranslationX = prevTranslationX.value + e.translationX;
 
-        if (isWithinhighlightArea(newTranslationX, newTranslationY)) {
+        if (isWithinHighlightArea(newTranslationX, newTranslationY)) {
           isHighlightAreaActive.value = true;
         } else {
           isHighlightAreaActive.value = false;
@@ -243,7 +243,7 @@ export const usePanGesture = () => {
 
         if (
           onDestroy &&
-          isWithinhighlightArea(translationX.value, translationY.value)
+          isWithinHighlightArea(translationX.value, translationY.value)
         ) {
           runOnJS(onDestroy)();
           return;
@@ -257,9 +257,9 @@ export const usePanGesture = () => {
     edges.value.maxY,
     edges.value.minY,
     handlePanEnd,
-    isActive,
+    isPanActive,
     isHighlightAreaActive,
-    isWithinhighlightArea,
+    isWithinHighlightArea,
     onDestroy,
     overDragSide,
     prevTranslationX,
