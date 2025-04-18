@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Gesture } from 'react-native-gesture-handler';
+import { Gesture, type PinchGesture } from 'react-native-gesture-handler';
 import { clamp, useSharedValue } from 'react-native-reanimated';
 import { usePiPViewContext } from '../context/PiPView.provider';
 
@@ -7,7 +7,11 @@ interface Options {
   onEnd: () => void;
 }
 
-export const usePinchGesture = ({ onEnd }: Options) => {
+export const usePinchGesture = ({
+  onEnd,
+}: Options): {
+  pinchGesture: PinchGesture;
+} => {
   const scale = usePiPViewContext((state) => state.scale);
   const pinchScaleOffset = useSharedValue(1);
   const SCALE_RESISTANCE_FACTOR = 0.4;

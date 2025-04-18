@@ -3,6 +3,7 @@ import {
   Gesture,
   type GestureStateChangeEvent,
   type PanGestureHandlerEventPayload,
+  type PanGesture,
 } from 'react-native-gesture-handler';
 import { clamp, runOnJS, useDerivedValue } from 'react-native-reanimated';
 
@@ -12,7 +13,12 @@ import { usePiPViewContext } from '../context/PiPView.provider';
 const VELOCITY_Y_MULTIPLIER = 0.1;
 const VELOCITY_X_MULTIPLIER = 0.05;
 
-export const usePanGesture = () => {
+export const usePanGesture = (): {
+  pan: PanGesture;
+  handlePanEnd: (
+    event?: GestureStateChangeEvent<PanGestureHandlerEventPayload>
+  ) => void;
+} => {
   const {
     _providedEdges,
     dockSide,
