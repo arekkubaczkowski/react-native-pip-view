@@ -97,28 +97,28 @@ export const usePanGesture = (): {
       );
 
       if (isOverDraggedLeft) {
-        translationX.value = hiddenLeftXValue.value;
-        dockSide.value = 'left';
+        translationX.set(hiddenLeftXValue.value);
+        dockSide.set('left');
 
-        isPanActive.value = false;
-        isHighlightAreaActive.value = false;
-        overDragSide.value = null;
+        isPanActive.set(false);
+        isHighlightAreaActive.set(false);
+        overDragSide.set(null);
 
         if (snapToEdges) {
-          translationY.value = translationY.value;
+          translationY.set(translationY.value);
         }
 
         return;
       } else if (isOverDraggedRight) {
-        translationX.value = hiddenRightXValue.value;
-        dockSide.value = 'right';
+        translationX.set(hiddenRightXValue.value);
+        dockSide.set('right');
 
-        isPanActive.value = false;
-        isHighlightAreaActive.value = false;
-        overDragSide.value = null;
+        isPanActive.set(false);
+        isHighlightAreaActive.set(false);
+        overDragSide.set(null);
 
         if (snapToEdges) {
-          translationY.value = translationY.value;
+          translationY.set(translationY.value);
         }
 
         return;
@@ -160,20 +160,20 @@ export const usePanGesture = (): {
         handleHideTansition(targetX, 'right');
       } else {
         targetX = snapToLeft ? edges.value.minX : edges.value.maxX;
-        dockSide.value = null;
+        dockSide.set(null);
       }
 
       if (!shouldHideLeft && !shouldHideRight) {
-        translationX.value = targetX;
+        translationX.set(targetX);
       }
       if (snapToEdges && !dockSide.value) {
-        translationY.value = findNearestYEdge(clampedY);
+        translationY.set(findNearestYEdge(clampedY));
       } else {
-        translationY.value = clampedY;
+        translationY.set(clampedY);
       }
-      isPanActive.value = false;
-      isHighlightAreaActive.value = false;
-      overDragSide.value = null;
+      isPanActive.set(false);
+      isHighlightAreaActive.set(false);
+      overDragSide.set(null);
     },
     [
       checkOverDrag,
@@ -204,9 +204,9 @@ export const usePanGesture = (): {
         if (disabled) {
           return;
         }
-        prevTranslationX.value = translationX.value;
-        prevTranslationY.value = translationY.value;
-        isPanActive.value = true;
+        prevTranslationX.set(translationX.value);
+        prevTranslationY.set(translationY.value);
+        isPanActive.set(true);
       })
       .onUpdate((e) => {
         if (disabled) {
@@ -215,32 +215,30 @@ export const usePanGesture = (): {
 
         const newTranslationY = prevTranslationY.value + e.translationY;
 
-        translationY.value = applyResistance(
-          newTranslationY,
-          edges.value.minY,
-          edges.value.maxY
+        translationY.set(
+          applyResistance(newTranslationY, edges.value.minY, edges.value.maxY)
         );
 
         const newTranslationX = prevTranslationX.value + e.translationX;
 
         if (isWithinHighlightArea(newTranslationX, newTranslationY)) {
-          isHighlightAreaActive.value = true;
+          isHighlightAreaActive.set(true);
         } else {
-          isHighlightAreaActive.value = false;
+          isHighlightAreaActive.set(false);
         }
 
         const [isOverDraggedLeft, isOverDraggedRight] =
           checkOverDrag(newTranslationX);
 
         if (isOverDraggedLeft) {
-          overDragSide.value = 'left';
+          overDragSide.set('left');
         } else if (isOverDraggedRight) {
-          overDragSide.value = 'right';
+          overDragSide.set('right');
         } else {
-          overDragSide.value = null;
+          overDragSide.set(null);
         }
 
-        translationX.value = newTranslationX;
+        translationX.set(newTranslationX);
       })
       .onEnd((event) => {
         if (disabled) {
