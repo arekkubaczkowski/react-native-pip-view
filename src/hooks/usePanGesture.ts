@@ -163,7 +163,7 @@ export const usePanGesture = (): {
         dockSide.value = null;
       }
 
-      if (!dockSide.value && !shouldHideLeft && !shouldHideRight) {
+      if (!shouldHideLeft && !shouldHideRight) {
         translationX.value = targetX;
       }
       if (snapToEdges && !dockSide.value) {

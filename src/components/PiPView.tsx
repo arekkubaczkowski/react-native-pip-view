@@ -29,8 +29,6 @@ export const PiPView = ({
   });
 
   const isInitialized = useDerivedValue(() => {
-    console.log('🚀 ~ isInitialized ~ edgeHandleLayout:', edgeHandleLayout);
-
     const isEdgeHandleInitialized = edgeHandle
       ? edgeHandleLayout.value.width > 0 && edgeHandleLayout.value.height > 0
       : true;

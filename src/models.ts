@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react';
 import { type LayoutRectangle } from 'react-native';
 
-export type DraggableElementInitialPosition = {
+export type PiPViewInitialPosition = {
   x: number | 'left' | 'right' | 'center';
   y: number | 'top' | 'bottom' | 'center';
 };
@@ -38,7 +38,7 @@ export type ScreenLayoutDimensions = ContainerLayoutRectangle & {
 export interface PiPViewProps {
   disabled?: boolean;
   destroyArea?: DestroyArea;
-  initialPosition?: DraggableElementInitialPosition;
+  initialPosition?: PiPViewInitialPosition;
   hideable?: boolean;
   layout: ScreenLayoutDimensions;
   snapToEdges?: boolean;

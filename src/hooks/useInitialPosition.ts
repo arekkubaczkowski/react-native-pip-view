@@ -7,14 +7,14 @@ import {
 } from 'react-native-reanimated';
 
 import {
-  type DraggableElementInitialPosition,
+  type PiPViewInitialPosition,
   type Edges,
   type ScreenLayoutDimensions,
 } from '../models';
 
 interface Options {
   edges: SharedValue<Edges | null>;
-  initialPosition?: DraggableElementInitialPosition;
+  initialPosition?: PiPViewInitialPosition;
   isInitialized: SharedValue<boolean>;
   layout: ScreenLayoutDimensions;
 }
