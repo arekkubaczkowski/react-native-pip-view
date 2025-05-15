@@ -4,6 +4,9 @@ A lightweight, customizable **Picture-in-Picture (PiP)** component for **React N
 
 ---
 
+## Demo: 
+https://x.com/tsolfitsmexx/status/1912752417176793170?s=46&t=kx6uESwbDrRgTUOCDr1tMQ
+
 ## ✨ Features
 
 - 🧲 Snap to screen edges  
