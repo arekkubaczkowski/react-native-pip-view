@@ -95,10 +95,12 @@ export const usePanGesture = (): {
       const [isOverDraggedLeft, isOverDraggedRight] = checkOverDrag(
         translationX.value
       );
+      let dockSideTmp = dockSide.value;
 
       if (isOverDraggedLeft) {
         translationX.set(hiddenLeftXValue.value);
         dockSide.set('left');
+        dockSideTmp = 'left';
 
         isPanActive.set(false);
         isHighlightAreaActive.set(false);
@@ -112,6 +114,7 @@ export const usePanGesture = (): {
       } else if (isOverDraggedRight) {
         translationX.set(hiddenRightXValue.value);
         dockSide.set('right');
+        dockSideTmp = 'right';
 
         isPanActive.set(false);
         isHighlightAreaActive.set(false);
@@ -161,12 +164,13 @@ export const usePanGesture = (): {
       } else {
         targetX = snapToLeft ? edges.value.minX : edges.value.maxX;
         dockSide.set(null);
+        dockSideTmp = null;
       }
 
-      if (!shouldHideLeft && !shouldHideRight) {
+      if (!dockSideTmp && !shouldHideLeft && !shouldHideRight) {
         translationX.set(targetX);
       }
-      if (snapToEdges && !dockSide.value) {
+      if (snapToEdges && !dockSideTmp) {
         translationY.set(findNearestYEdge(clampedY));
       } else {
         translationY.set(clampedY);
