@@ -56,7 +56,9 @@ export const EdgeHandle = ({
   }));
 
   return (
-    <Animated.View style={[containerStyle, style, styles.button]}>
+    <Animated.View
+      style={[containerStyle, style, styles.button, pressableStyle]}
+    >
       <Pressable
         onPress={onPress}
         onPressIn={() => {
@@ -65,7 +67,7 @@ export const EdgeHandle = ({
         onPressOut={() => {
           pressOpacity.value = withTiming(1, { duration: 150 });
         }}
-        style={[styles.grow, pressableStyle]}
+        style={[styles.grow]}
       >
         {edgeHandle?.left && edgeHandle.right ? (
           <CustomEdgeHandle side={side} />
@@ -80,6 +82,7 @@ export const EdgeHandle = ({
 const styles = StyleSheet.create({
   button: {
     position: 'absolute',
+    zIndex: 100,
   },
   grow: {
     flexGrow: 1,
