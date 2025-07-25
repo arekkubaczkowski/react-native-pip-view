@@ -1,12 +1,11 @@
 import { useDerivedValue } from 'react-native-reanimated';
 
-import { StyleSheet } from 'react-native';
-import type { PressableProps } from 'react-native-gesture-handler';
+import { StyleSheet, type GestureResponderEvent } from 'react-native';
 import { usePiPViewContext } from '../context/PiPView.provider';
 import { EdgeHandle } from './EdgeHandle';
 
 interface Props {
-  onPress: PressableProps['onPress'];
+  onPress: (event: GestureResponderEvent) => void;
 }
 
 export const LeftEdgeHandle = ({ onPress }: Props) => {
