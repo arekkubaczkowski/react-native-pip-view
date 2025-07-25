@@ -1,17 +1,13 @@
-import {
-  StyleSheet,
-  TouchableOpacity,
-  type GestureResponderEvent,
-  type StyleProp,
-  type ViewStyle,
-} from 'react-native';
+import { StyleSheet, type StyleProp, type ViewStyle } from 'react-native';
 import Animated, {
   useAnimatedStyle,
+  useSharedValue,
   withSpring,
   withTiming,
   type SharedValue,
 } from 'react-native-reanimated';
 
+import { Pressable, type PressableProps } from 'react-native-gesture-handler';
 import { animationsPresets } from '../constants';
 import { usePiPViewContext } from '../context/PiPView.provider';
 import { type EdgeSide } from '../models';
@@ -21,7 +17,7 @@ import { CustomEdgeHandle } from './CustomEdgeHandle';
 interface Props {
   translateX: SharedValue<number>;
   isVisible: SharedValue<boolean>;
-  onPress: (event: GestureResponderEvent) => void;
+  onPress: PressableProps['onPress'];
   style?: StyleProp<ViewStyle>;
   side: EdgeSide;
 }
@@ -37,6 +33,9 @@ export const EdgeHandle = ({
     edgeHandle: state.edgeHandle,
     elementLayout: state.elementLayout,
   }));
+
+  const pressOpacity = useSharedValue(1);
+
   const containerStyle = useAnimatedStyle(() => ({
     height: elementLayout.value.height,
     transform: [
@@ -52,15 +51,28 @@ export const EdgeHandle = ({
     zIndex: -1,
   }));
 
+  const pressableStyle = useAnimatedStyle(() => ({
+    opacity: pressOpacity.value,
+  }));
+
   return (
     <Animated.View style={[containerStyle, style, styles.button]}>
-      <TouchableOpacity onPress={onPress} style={styles.grow}>
+      <Pressable
+        onPress={onPress}
+        onPressIn={() => {
+          pressOpacity.value = withTiming(0.6, { duration: 150 });
+        }}
+        onPressOut={() => {
+          pressOpacity.value = withTiming(1, { duration: 150 });
+        }}
+        style={[styles.grow, pressableStyle]}
+      >
         {edgeHandle?.left && edgeHandle.right ? (
           <CustomEdgeHandle side={side} />
         ) : (
           <ArrowButton side={side} />
         )}
-      </TouchableOpacity>
+      </Pressable>
     </Animated.View>
   );
 };
