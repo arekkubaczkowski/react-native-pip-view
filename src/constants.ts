@@ -4,10 +4,12 @@ export const animationsPresets = {
   responsiveSpring: {
     damping: 80,
     stiffness: 200,
+    mass: 1,
   },
   lazy: {
     damping: 80,
     stiffness: 300,
+    mass: 1,
   },
   softLanding: {
     damping: 2000,
