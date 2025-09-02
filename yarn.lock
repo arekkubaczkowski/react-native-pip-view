@@ -6793,18 +6793,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expo-blur@npm:^14.0.3":
-  version: 14.1.2
-  resolution: "expo-blur@npm:14.1.2"
-  peerDependencies:
-    expo: "*"
-    react: "*"
-    react-native: "*"
-  checksum: 004e62746d459312fa74f67c8c737dadd151754966b93b3431d943230d810dc1d56768d4a2482b213e70a8dfce9f9b3307605bfc6343b618c7d29f08162e98d2
-  languageName: node
-  linkType: hard
-
-"expo-blur@npm:~14.1.5":
+"expo-blur@npm:^14.1.5, expo-blur@npm:~14.1.5":
   version: 14.1.5
   resolution: "expo-blur@npm:14.1.5"
   peerDependencies:
@@ -11779,6 +11768,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-native-gesture-handler@npm:^2.28.0":
+  version: 2.28.0
+  resolution: "react-native-gesture-handler@npm:2.28.0"
+  dependencies:
+    "@egjs/hammerjs": ^2.0.17
+    hoist-non-react-statics: ^3.3.0
+    invariant: ^2.2.4
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: 7bcd7db784b12565fdd5916bbebc2d3511a63159ca553d33e430008940ba7d209f1e85ef02968a920ed19c414fabe7d2c18cc0e967dd4889aae266788562d1e9
+  languageName: node
+  linkType: hard
+
 "react-native-gesture-handler@npm:~2.24.0":
   version: 2.24.0
   resolution: "react-native-gesture-handler@npm:2.24.0"
@@ -11852,13 +11855,13 @@ __metadata:
     eslint-config-prettier: ^10.1.1
     eslint-plugin-prettier: ^5.2.3
     expo: ^53.0.22
-    expo-blur: ^14.0.3
+    expo-blur: ^14.1.5
     jest: ^29.7.0
     prettier: ^3.0.3
     react: 19.0.0
     react-native: 0.79.5
     react-native-builder-bob: ^0.40.6
-    react-native-gesture-handler: ~2.24.0
+    react-native-gesture-handler: ^2.28.0
     react-native-reanimated: ^4.1.0
     react-native-svg: ^15.11.2
     react-native-worklets: ^0.5.0
