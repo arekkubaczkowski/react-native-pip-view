@@ -101,6 +101,7 @@ export const PiPViewImpl = ({ children }: PropsWithChildren) => {
         .runOnJS(true)
         .shouldCancelWhenOutside(true)
         .onTouchesUp(() => {
+          // This runs on JS thread due to .runOnJS(true)
           if (dockSide.value) {
             return;
           }
