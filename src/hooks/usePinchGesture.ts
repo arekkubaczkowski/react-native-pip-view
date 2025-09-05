@@ -20,14 +20,17 @@ export const usePinchGesture = ({
     () =>
       Gesture.Pinch()
         .onStart(() => {
+          'worklet';
           pinchScaleOffset.value = scale.value;
         })
         .onUpdate((event) => {
+          'worklet';
           const pinchDelta = (event.scale - 1) * SCALE_RESISTANCE_FACTOR;
           const value = pinchScaleOffset.value * (1 + pinchDelta);
           scale.value = clamp(value, 0.5, 1.5);
         })
         .onEnd(() => {
+          'worklet';
           let target = 1;
           if (scale.value < 0.85) {
             target = 0.7;

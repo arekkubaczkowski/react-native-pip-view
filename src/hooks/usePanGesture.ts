@@ -205,6 +205,7 @@ export const usePanGesture = (): {
   const pan = useMemo(() => {
     return Gesture.Pan()
       .onStart(() => {
+        'worklet';
         if (disabled) {
           return;
         }
@@ -213,6 +214,7 @@ export const usePanGesture = (): {
         isPanActive.set(true);
       })
       .onUpdate((e) => {
+        'worklet';
         if (disabled) {
           return;
         }
@@ -245,6 +247,7 @@ export const usePanGesture = (): {
         translationX.set(newTranslationX);
       })
       .onEnd((event) => {
+        'worklet';
         if (disabled) {
           return;
         }
