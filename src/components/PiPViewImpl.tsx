@@ -212,14 +212,14 @@ export const PiPViewImpl = ({ children }: PropsWithChildren) => {
           ),
         },
         {
-          scale: withSpring(scale.value, animationsPresets.softLanding),
-        },
-        {
-          scale: isDestroyed.value
-            ? withTiming(scaleConstants.min)
-            : isHighlightAreaActive.value
-              ? withTiming(scaleConstants.highlighted)
-              : withTiming(scaleConstants.normal),
+          scale: withSpring(
+            isDestroyed.value
+              ? scaleConstants.min
+              : isHighlightAreaActive.value
+                ? scale.value * scaleConstants.highlighted
+                : scale.value,
+            animationsPresets.softLanding
+          ),
         },
       ],
       opacity: withTiming(getOpacity()),
