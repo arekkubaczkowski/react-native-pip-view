@@ -8,15 +8,13 @@ import Animated, {
   withDelay,
   withSpring,
   withTiming,
-  type SharedValue,
 } from 'react-native-reanimated';
 
 import { animationsPresets } from '../constants';
 import { LeftEdgeHandle } from './LeftEdgeHandle';
-import { type ContainerLayoutRectangle, type Dimensions } from '../models';
 import { usePiPViewContext } from '../context/PiPView.provider';
 import { RightEdgeHandle } from './RightEdgeHandle';
-import { getEdges } from '../utils';
+import { getEdges, getCurrentHorizontalSide } from '../utils';
 import { usePanGesture } from '../hooks/usePanGesture';
 import { usePinchGesture } from '../hooks/usePinchGesture';
 import { useDragHelpers } from '../hooks/useDragHelpers';
@@ -89,20 +87,6 @@ export const PiPViewImpl = ({ children }: PropsWithChildren) => {
   const offsetX = useDerivedValue(() => diffX.value / 2);
   const offsetY = useDerivedValue(() => diffY.value / 2);
 
-  const getCurrentHorizontalSide = useCallback(
-    (
-      currentContainerLayout: ContainerLayoutRectangle,
-      currentElementLayout: SharedValue<Dimensions>
-    ) => {
-      'worklet';
-      return translationX.value <
-        (currentContainerLayout.width - currentElementLayout.value.width) / 2
-        ? 'left'
-        : 'right';
-    },
-    [translationX]
-  );
-
   const tapGesture = useMemo(
     () =>
       Gesture.Tap()
@@ -172,8 +156,9 @@ export const PiPViewImpl = ({ children }: PropsWithChildren) => {
         );
         const snapToLeft =
           getCurrentHorizontalSide(
-            currentContainerLayout,
-            currentScaledElementLayout
+            translationX.value,
+            currentContainerLayout.width,
+            currentScaledElementLayout.value.width
           ) === 'left';
         const targetX = snapToLeft ? currentEdges.minX : currentEdges.maxX;
 
