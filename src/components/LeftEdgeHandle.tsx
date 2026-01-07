@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { useDerivedValue } from 'react-native-reanimated';
 
 import { StyleSheet, type GestureResponderEvent } from 'react-native';
@@ -8,7 +9,7 @@ interface Props {
   onPress: (event: GestureResponderEvent) => void;
 }
 
-export const LeftEdgeHandle = ({ onPress }: Props) => {
+const LeftEdgeHandleComponent = ({ onPress }: Props) => {
   const { dockSide, overDragSide, edgeHandleLayout } = usePiPViewContext(
     (state) => ({
       onPress: state.onPress,
@@ -44,6 +45,8 @@ export const LeftEdgeHandle = ({ onPress }: Props) => {
     />
   );
 };
+
+export const LeftEdgeHandle = memo(LeftEdgeHandleComponent);
 
 const styles = StyleSheet.create({
   button: {

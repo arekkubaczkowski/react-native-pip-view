@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import Animated, {
   useAnimatedStyle,
   withTiming,
@@ -11,7 +12,7 @@ interface Props {
   side: EdgeSide;
 }
 
-export const CustomEdgeHandle = ({ side }: Props) => {
+const CustomEdgeHandleComponent = ({ side }: Props) => {
   const { edgeHandle, edgeHandleLayout, elementLayout } = usePiPViewContext(
     (state) => ({
       edgeHandle: state.edgeHandle,
@@ -76,6 +77,8 @@ export const CustomEdgeHandle = ({ side }: Props) => {
     </>
   );
 };
+
+export const CustomEdgeHandle = memo(CustomEdgeHandleComponent);
 
 const styles = StyleSheet.create({
   handle: {

@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { StyleSheet, type LayoutChangeEvent } from 'react-native';
 import Animated, {
   useAnimatedStyle,
@@ -13,7 +14,7 @@ interface Props {
   side: EdgeSide | null;
 }
 
-export const ArrowButton = ({ side }: Props) => {
+const ArrowButtonComponent = ({ side }: Props) => {
   const { edgeHandleLayout, edgeHandle } = usePiPViewContext((state) => ({
     edgeHandleLayout: state.edgeHandleLayout,
     edgeHandle: state.edgeHandle,
@@ -68,6 +69,8 @@ export const ArrowButton = ({ side }: Props) => {
     </Animated.View>
   );
 };
+
+export const ArrowButton = memo(ArrowButtonComponent);
 
 const styles = StyleSheet.create({
   container: {

@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import {
   StyleSheet,
   TouchableOpacity,
@@ -26,7 +27,7 @@ interface Props {
   side: EdgeSide;
 }
 
-export const EdgeHandle = ({
+const EdgeHandleComponent = ({
   onPress,
   translateX,
   isVisible,
@@ -65,6 +66,8 @@ export const EdgeHandle = ({
     </Animated.View>
   );
 };
+
+export const EdgeHandle = memo(EdgeHandleComponent);
 
 const styles = StyleSheet.create({
   button: {
