@@ -119,6 +119,43 @@ interface ScreenLayoutDimensions {
 
 ---
 
+## 📁 Project Structure
+
+The project follows a modular architecture for better maintainability:
+
+```
+src/
+├── components/          # React components
+│   ├── PiPView.tsx     # Main PiP component
+│   ├── PiPViewImpl.tsx # Implementation component
+│   ├── EdgeHandle.tsx  # Edge handle components
+│   └── ...             # Other UI components
+├── context/            # React context providers
+│   └── PiPView.provider.tsx
+├── hooks/              # Custom React hooks
+│   ├── usePanGesture.ts    # Pan gesture handling
+│   ├── usePinchGesture.ts  # Pinch gesture handling
+│   ├── useDragHelpers.ts   # Drag utilities
+│   └── useInitialPosition.ts
+├── styles/             # Styling and theme constants
+│   └── theme.ts        # Centralized theme values
+├── utils/              # Utility functions
+│   ├── snapping.ts     # Edge snapping logic
+│   ├── gestures.ts     # Gesture calculations
+│   └── destroyArea.ts  # Destroy area utilities
+├── constants.ts        # Animation presets
+└── models.ts           # TypeScript types
+```
+
+### Key Design Principles
+
+- **Separation of Concerns**: Logic is split into dedicated hooks and utility modules
+- **Performance**: React.memo is used on frequently rendered components
+- **Maintainability**: Magic numbers are extracted to theme constants
+- **Type Safety**: Full TypeScript support with detailed type definitions
+
+---
+
 ## 💡 Inspiration
 
 Inspired by iOS Picture-in-Picture, this component enables similar interaction in-app for content like video previews, chat heads, or widgets.
