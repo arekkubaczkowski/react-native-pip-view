@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { Gesture, type PinchGesture } from 'react-native-gesture-handler';
 import { clamp, useSharedValue } from 'react-native-reanimated';
 import { usePiPViewContext } from '../context/PiPView.provider';
+import { gesture, scale as scaleConstants } from '../styles/theme';
 
 interface Options {
   onEnd: () => void;
@@ -14,7 +15,6 @@ export const usePinchGesture = ({
 } => {
   const scale = usePiPViewContext((state) => state.scale);
   const pinchScaleOffset = useSharedValue(1);
-  const SCALE_RESISTANCE_FACTOR = 0.4;
 
   const pinchGesture = useMemo(
     () =>
@@ -25,19 +25,19 @@ export const usePinchGesture = ({
         })
         .onUpdate((event) => {
           'worklet';
-          const pinchDelta = (event.scale - 1) * SCALE_RESISTANCE_FACTOR;
+          const pinchDelta = (event.scale - 1) * gesture.scaleResistanceFactor;
           const value = pinchScaleOffset.value * (1 + pinchDelta);
-          scale.value = clamp(value, 0.5, 1.5);
+          scale.value = clamp(value, scaleConstants.min, scaleConstants.max);
         })
         .onEnd(() => {
           'worklet';
-          let target = 1;
-          if (scale.value < 0.85) {
-            target = 0.7;
-          } else if (scale.value < 1.15) {
-            target = 1;
+          let target = scaleConstants.normal;
+          if (scale.value < scaleConstants.smallThreshold) {
+            target = scaleConstants.small;
+          } else if (scale.value < scaleConstants.normalThreshold) {
+            target = scaleConstants.normal;
           } else {
-            target = 1.3;
+            target = scaleConstants.large;
           }
           scale.value = target;
           onEnd();

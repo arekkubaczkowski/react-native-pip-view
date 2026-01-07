@@ -9,9 +9,7 @@ import { clamp, runOnJS, useDerivedValue } from 'react-native-reanimated';
 
 import { useDragHelpers } from './useDragHelpers';
 import { usePiPViewContext } from '../context/PiPView.provider';
-
-const VELOCITY_Y_MULTIPLIER = 0.1;
-const VELOCITY_X_MULTIPLIER = 0.05;
+import { gesture } from '../styles/theme';
 
 export const usePanGesture = (): {
   pan: PanGesture;
@@ -90,7 +88,7 @@ export const usePanGesture = (): {
 
       const velocityX = event?.velocityX || 0;
       const velocityY = event?.velocityY || 0;
-      const velocityThreshold = 1700;
+      const velocityThreshold = gesture.velocityThreshold;
 
       const [isOverDraggedLeft, isOverDraggedRight] = checkOverDrag(
         translationX.value
@@ -128,7 +126,7 @@ export const usePanGesture = (): {
       }
 
       const targetYWithVelocity =
-        translationY.value + velocityY * VELOCITY_Y_MULTIPLIER;
+        translationY.value + velocityY * gesture.velocityYMultiplier;
       const clampedY = clamp(
         targetYWithVelocity,
         edges.value.minY,
@@ -136,7 +134,7 @@ export const usePanGesture = (): {
       );
 
       const targetXWithVelocity =
-        translationX.value + velocityX * VELOCITY_X_MULTIPLIER;
+        translationX.value + velocityX * gesture.velocityXMultiplier;
 
       const snapToLeft =
         targetXWithVelocity <

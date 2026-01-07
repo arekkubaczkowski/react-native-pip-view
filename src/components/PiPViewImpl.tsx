@@ -20,6 +20,14 @@ import { getEdges } from '../utils';
 import { usePanGesture } from '../hooks/usePanGesture';
 import { usePinchGesture } from '../hooks/usePinchGesture';
 import { useDragHelpers } from '../hooks/useDragHelpers';
+import {
+  zIndex,
+  opacity,
+  scale as scaleConstants,
+  timing,
+  borderRadius,
+  colors,
+} from '../styles/theme';
 
 export const PiPViewImpl = ({ children }: PropsWithChildren) => {
   const {
@@ -179,13 +187,13 @@ export const PiPViewImpl = ({ children }: PropsWithChildren) => {
     const getOpacity = () => {
       switch (true) {
         case !!overDragSide.value:
-          return 1;
+          return opacity.visible;
         case isHighlightAreaActive.value:
-          return 0.7;
+          return opacity.dimmed;
         case isDestroyed.value:
-          return 0;
+          return opacity.hidden;
         default:
-          return 1;
+          return opacity.visible;
       }
     };
 
@@ -223,10 +231,10 @@ export const PiPViewImpl = ({ children }: PropsWithChildren) => {
         },
         {
           scale: isDestroyed.value
-            ? withTiming(0)
+            ? withTiming(scaleConstants.min)
             : isHighlightAreaActive.value
-              ? withTiming(0.9)
-              : withTiming(1),
+              ? withTiming(scaleConstants.highlighted)
+              : withTiming(scaleConstants.normal),
         },
       ],
       opacity: withTiming(getOpacity()),
@@ -236,13 +244,13 @@ export const PiPViewImpl = ({ children }: PropsWithChildren) => {
   const destroyAreaStyle = useAnimatedStyle(() => {
     const active = isPanActive.value && !dockSide.value;
     return {
-      opacity: 1,
+      opacity: opacity.visible,
       backgroundColor: withTiming(
         isHighlightAreaActive.value
-          ? destroyArea?.activeColor || 'rgba(255, 255, 255, 0.15)'
+          ? destroyArea?.activeColor || colors.destroyAreaActive
           : active
-            ? destroyArea?.inactiveColor || 'rgba(255, 255, 255, 0.05)'
-            : 'transparent'
+            ? destroyArea?.inactiveColor || colors.destroyAreaInactive
+            : colors.transparent
       ),
       height: destroyArea?.layout.height,
       width: destroyArea?.layout.width,
@@ -253,9 +261,9 @@ export const PiPViewImpl = ({ children }: PropsWithChildren) => {
 
   const containerStyles = useAnimatedStyle(() => ({
     opacity: withDelay(
-      200,
+      timing.initializationDelay,
       withSpring(
-        isInitialized.value ? 1 : 0,
+        isInitialized.value ? opacity.visible : opacity.hidden,
         animationsPresets.responsiveSpring
       )
     ),
@@ -289,17 +297,17 @@ export const PiPViewImpl = ({ children }: PropsWithChildren) => {
 const styles = StyleSheet.create({
   destroyArea: {
     position: 'absolute',
-    borderRadius: 16,
-    zIndex: 999,
+    borderRadius: borderRadius.destroyArea,
+    zIndex: zIndex.destroyArea,
     pointerEvents: 'none',
   },
   container: {
     position: 'absolute',
-    zIndex: 9999,
+    zIndex: zIndex.pipContainer,
   },
   innerContainer: {
     position: 'absolute',
-    zIndex: 9999,
+    zIndex: zIndex.pipContainer,
     left: 0,
     top: 0,
   },

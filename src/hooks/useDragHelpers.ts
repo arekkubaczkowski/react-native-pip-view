@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import { clamp, useDerivedValue } from 'react-native-reanimated';
 import { usePiPViewContext } from '../context/PiPView.provider';
+import { gesture, drag } from '../styles/theme';
 
 export const useDragHelpers = () => {
   const {
@@ -33,11 +34,10 @@ export const useDragHelpers = () => {
 
   const applyResistance = (offset: number, min: number, max: number) => {
     'worklet';
-    const resistanceFactor = 0.5;
     if (offset < min) {
-      return min + (offset - min) * resistanceFactor;
+      return min + (offset - min) * gesture.resistanceFactor;
     } else if (offset > max) {
-      return max + (offset - max) * resistanceFactor;
+      return max + (offset - max) * gesture.resistanceFactor;
     } else {
       return offset;
     }
@@ -110,8 +110,12 @@ export const useDragHelpers = () => {
       'worklet';
       translationX.value = clamp(
         targetX,
-        edges.value.minX - scaledElementLayout.value.width - 50,
-        edges.value.maxX + scaledElementLayout.value.width + 50
+        edges.value.minX -
+          scaledElementLayout.value.width -
+          drag.hiddenEdgePadding,
+        edges.value.maxX +
+          scaledElementLayout.value.width +
+          drag.hiddenEdgePadding
       );
 
       dockSide.value = side;

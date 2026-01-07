@@ -7,6 +7,7 @@ import { PiPViewProvider } from '../context/PiPView.provider';
 import { PiPViewImpl } from './PiPViewImpl';
 import { getEdges } from '../utils';
 import { useInitialPosition } from '../hooks/useInitialPosition';
+import { drag, timing } from '../styles/theme';
 
 export const PiPView = ({
   children,
@@ -66,7 +67,7 @@ export const PiPView = ({
   });
 
   const overDragOffset = useDerivedValue(
-    () => scaledElementLayout.value.width * 0.4
+    () => scaledElementLayout.value.width * drag.overDragOffsetMultiplier
   );
 
   const overDragSide = useSharedValue<EdgeSide | null>(null);
@@ -76,7 +77,7 @@ export const PiPView = ({
 
     const timeout = setTimeout(() => {
       onDestroy?.();
-    }, 150);
+    }, timing.destroyDelay);
 
     return () => {
       clearTimeout(timeout);
