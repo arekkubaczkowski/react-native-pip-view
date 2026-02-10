@@ -116,11 +116,11 @@ export const PiPViewImpl = ({ children }: PropsWithChildren) => {
   );
 
   const handleExpandView = useCallback(() => {
-    const minX = layout.horizontalOffet ?? 0;
+    const minX = layout.horizontalOffset ?? 0;
     const maxX =
       layout.width -
       scaledElementLayout.value.width -
-      (layout.horizontalOffet ?? 0);
+      (layout.horizontalOffset ?? 0);
 
     const targetX = dockSide.value === 'left' ? minX : maxX;
     translationX.value = targetX;
@@ -131,7 +131,7 @@ export const PiPViewImpl = ({ children }: PropsWithChildren) => {
     overDragSide.value = null;
     dockSide.value = null;
   }, [
-    layout.horizontalOffet,
+    layout.horizontalOffset,
     layout.width,
     scaledElementLayout.value.width,
     dockSide,
