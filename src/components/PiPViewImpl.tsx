@@ -259,6 +259,12 @@ export const PiPViewImpl = ({ children }: PropsWithChildren) => {
         animationsPresets.responsiveSpring
       )
     ),
+    // Constrain the container to the PIP element size. Without explicit
+    // dimensions, GestureDetector on React Native 0.85 + gesture-handler
+    // 2.31 expands to fill the parent (entire screen), causing the PIP's
+    // tap/pan gestures to capture events anywhere on screen.
+    width: scaledElementLayout.value.width,
+    height: scaledElementLayout.value.height,
   }));
 
   return (
