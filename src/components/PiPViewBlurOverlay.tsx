@@ -20,10 +20,10 @@ export const PiPViewBlurOverlay = ({ style }: Props) => {
 
   return (
     <Animated.View
-      style={[StyleSheet.absoluteFillObject, stylez, styles.container, style]}
+      style={[StyleSheet.absoluteFill, stylez, styles.container, style]}
     >
       <BlurView
-        style={[StyleSheet.absoluteFillObject]}
+        style={StyleSheet.absoluteFill}
         intensity={20}
         tint="dark"
         experimentalBlurMethod="dimezisBlurView"
