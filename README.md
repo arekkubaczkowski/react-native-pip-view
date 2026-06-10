@@ -85,6 +85,9 @@ export default function App() {
 | `onPress`         | `() => void`                                   | Callback triggered on PiP tap.                                                     |
 | `edgeHandle`      | `{ left: ReactElement; right: ReactElement; }` | Customizable left and right handles that appear when the PiP is hidden off-screen. |
 
+> 💡 **Tip:** Object props (`layout`, `destroyArea`, `initialPosition`, `edgeHandle`) and callbacks (`onPress`, `onDestroy`) should be memoized (`useMemo` / `useCallback`) in the consuming component. Inline literals create a new reference on every render, which forces unnecessary re-renders of the PiP internals.
+> Note that `disabled` only disables dragging and scaling — `onPress` still fires on tap.
+
 ### 🔻 `DestroyArea`
 
 ```ts

@@ -9,25 +9,15 @@ interface Props {
 }
 
 export const LeftEdgeHandle = ({ onPress }: Props) => {
-  const { dockSide, overDragSide, edgeHandleLayout } = usePiPViewContext(
-    (state) => ({
-      onPress: state.onPress,
-      overDragSide: state.overDragSide,
-      dockSide: state.dockSide,
-      elementLayout: state.elementLayout,
-      edgeHandleLayout: state.edgeHandleLayout,
-    })
-  );
+  const dockSide = usePiPViewContext((state) => state.dockSide);
+  const overDragSide = usePiPViewContext((state) => state.overDragSide);
+  const edgeHandleLayout = usePiPViewContext((state) => state.edgeHandleLayout);
 
   const translateX = useDerivedValue<number>(() => {
-    switch (true) {
-      case overDragSide.value === 'left':
-        return edgeHandleLayout.value.width;
-      case dockSide.value === 'left':
-        return edgeHandleLayout.value.width;
-      default:
-        return 0;
+    if (overDragSide.value === 'left' || dockSide.value === 'left') {
+      return edgeHandleLayout.value.width;
     }
+    return 0;
   });
 
   const isVisible = useDerivedValue(

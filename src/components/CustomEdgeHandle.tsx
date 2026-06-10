@@ -12,13 +12,9 @@ interface Props {
 }
 
 export const CustomEdgeHandle = ({ side }: Props) => {
-  const { edgeHandle, edgeHandleLayout, elementLayout } = usePiPViewContext(
-    (state) => ({
-      edgeHandle: state.edgeHandle,
-      edgeHandleLayout: state.edgeHandleLayout,
-      elementLayout: state.elementLayout,
-    })
-  );
+  const edgeHandle = usePiPViewContext((state) => state.edgeHandle);
+  const edgeHandleLayout = usePiPViewContext((state) => state.edgeHandleLayout);
+  const elementLayout = usePiPViewContext((state) => state.elementLayout);
 
   const leftHandleStyle = useAnimatedStyle(() => ({
     opacity: withTiming(side === 'left' ? 1 : 0),
@@ -42,17 +38,17 @@ export const CustomEdgeHandle = ({ side }: Props) => {
   }));
 
   const onLayoutLeftHandle = (event: LayoutChangeEvent) => {
-    edgeHandleLayout.value = {
+    edgeHandleLayout.set({
       width: event.nativeEvent.layout.width,
       height: event.nativeEvent.layout.height,
-    };
+    });
   };
 
   const onLayoutRightHandle = (event: LayoutChangeEvent) => {
-    edgeHandleLayout.value = {
+    edgeHandleLayout.set({
       width: event.nativeEvent.layout.width,
       height: event.nativeEvent.layout.height,
-    };
+    });
   };
 
   if (!edgeHandle?.left || !edgeHandle?.right) {

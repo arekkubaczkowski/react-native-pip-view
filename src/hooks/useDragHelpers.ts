@@ -1,25 +1,21 @@
-import { useCallback } from 'react';
 import { clamp, useDerivedValue } from 'react-native-reanimated';
+
 import { usePiPViewContext } from '../context/PiPView.provider';
+import { type EdgeSide } from '../models';
+import { isWithinDestroyArea as isWithinDestroyAreaUtil } from '../utils/destroyArea';
+
+const HIDDEN_EDGE_PADDING = 50;
 
 export const useDragHelpers = () => {
-  const {
-    _providedEdges,
-    scaledElementLayout,
-    hideable,
-    translationX,
-    overDragOffset,
-    dockSide,
-    destroyArea,
-  } = usePiPViewContext((state) => ({
-    _providedEdges: state.edges,
-    scaledElementLayout: state.scaledElementLayout,
-    translationX: state.translationX,
-    hideable: state.hideable,
-    overDragOffset: state.overDragOffset,
-    dockSide: state.dockSide,
-    destroyArea: state.destroyArea,
-  }));
+  const _providedEdges = usePiPViewContext((state) => state.edges);
+  const scaledElementLayout = usePiPViewContext(
+    (state) => state.scaledElementLayout
+  );
+  const hideable = usePiPViewContext((state) => state.hideable);
+  const translationX = usePiPViewContext((state) => state.translationX);
+  const overDragOffset = usePiPViewContext((state) => state.overDragOffset);
+  const dockSide = usePiPViewContext((state) => state.dockSide);
+  const destroyArea = usePiPViewContext((state) => state.destroyArea);
 
   const edges = useDerivedValue(
     () =>
@@ -31,105 +27,56 @@ export const useDragHelpers = () => {
       }
   );
 
-  const applyResistance = (offset: number, min: number, max: number) => {
+  const checkOverDrag = (x: number): [boolean, boolean] => {
     'worklet';
-    const resistanceFactor = 0.5;
-    if (offset < min) {
-      return min + (offset - min) * resistanceFactor;
-    } else if (offset > max) {
-      return max + (offset - max) * resistanceFactor;
-    } else {
-      return offset;
+
+    if (!hideable) {
+      return [false, false];
     }
+    const overDragLeftPosition = edges.get().minX - x;
+    const overDragRightPosition = x - edges.get().maxX;
+
+    const isOverDraggedLeft = overDragLeftPosition > overDragOffset.get();
+    const isOverDraggedRight = overDragRightPosition > overDragOffset.get();
+
+    return [isOverDraggedLeft, isOverDraggedRight];
   };
 
-  const checkOverDrag = useCallback(
-    (x: number) => {
-      'worklet';
+  const findNearestYEdge = (y: number) => {
+    'worklet';
+    const midY = (edges.get().minY + edges.get().maxY) / 2;
+    return y < midY ? edges.get().minY : edges.get().maxY;
+  };
 
-      if (!hideable) {
-        return [false, false];
-      }
-      const overDragLeftPosition = edges.value.minX - x;
-      const overDragRightPosition = x - edges.value.maxX;
+  const isWithinDestroyArea = (x: number, y: number) => {
+    'worklet';
+    return isWithinDestroyAreaUtil(
+      x,
+      y,
+      scaledElementLayout.get(),
+      destroyArea?.layout
+    );
+  };
 
-      const isOverDraggedLeft = overDragLeftPosition > overDragOffset.value;
-      const isOverDraggedRight = overDragRightPosition > overDragOffset.value;
-
-      return [isOverDraggedLeft, isOverDraggedRight];
-    },
-    [edges, hideable, overDragOffset]
-  );
-
-  const findNearestYEdge = useCallback(
-    (y: number) => {
-      'worklet';
-      const midY = (edges.value.minY + edges.value.maxY) / 2;
-      return y < midY ? edges.value.minY : edges.value.maxY;
-    },
-    [edges]
-  );
-
-  const isWithinHighlightArea = useCallback(
-    (x: number, y: number) => {
-      'worklet';
-      if (destroyArea?.layout) {
-        const draggableLeft = x;
-        const draggableRight = x + scaledElementLayout.value.width;
-        const draggableTop = y;
-        const draggableBottom = y + scaledElementLayout.value.height;
-
-        // Coordinates and dimensions of the highlighted area
-        const highlightedLeft = destroyArea.layout.x ?? 0;
-        const highlightedRight =
-          (destroyArea.layout.x ?? 0) + destroyArea.layout.width;
-        const highlightedTop = destroyArea.layout.y ?? 0;
-        const highlightedBottom =
-          (destroyArea.layout.y ?? 0) + destroyArea.layout.height;
-
-        // Check for overlap
-        const isOverlapping =
-          draggableLeft < highlightedRight &&
-          draggableRight > highlightedLeft &&
-          draggableTop < highlightedBottom &&
-          draggableBottom > highlightedTop;
-
-        return isOverlapping;
-      }
-      return false;
-    },
-    [
-      destroyArea?.layout,
-      scaledElementLayout.value.height,
-      scaledElementLayout.value.width,
-    ]
-  );
-
-  const handleHideTansition = useCallback(
-    (targetX: number, side: 'left' | 'right') => {
-      'worklet';
-      translationX.value = clamp(
+  const handleHideTransition = (targetX: number, side: EdgeSide) => {
+    'worklet';
+    translationX.set(
+      clamp(
         targetX,
-        edges.value.minX - scaledElementLayout.value.width - 50,
-        edges.value.maxX + scaledElementLayout.value.width + 50
-      );
+        edges.get().minX -
+          scaledElementLayout.get().width -
+          HIDDEN_EDGE_PADDING,
+        edges.get().maxX + scaledElementLayout.get().width + HIDDEN_EDGE_PADDING
+      )
+    );
 
-      dockSide.value = side;
-    },
-    [
-      dockSide,
-      edges.value.maxX,
-      edges.value.minX,
-      scaledElementLayout.value.width,
-      translationX,
-    ]
-  );
+    dockSide.set(side);
+  };
 
   return {
-    handleHideTansition,
-    isWithinHighlightArea,
+    handleHideTransition,
+    isWithinDestroyArea,
     findNearestYEdge,
     checkOverDrag,
-    applyResistance,
   };
 };

@@ -33,10 +33,8 @@ export const EdgeHandle = ({
   style,
   side,
 }: Props) => {
-  const { edgeHandle, elementLayout } = usePiPViewContext((state) => ({
-    edgeHandle: state.edgeHandle,
-    elementLayout: state.elementLayout,
-  }));
+  const edgeHandle = usePiPViewContext((state) => state.edgeHandle);
+  const elementLayout = usePiPViewContext((state) => state.elementLayout);
 
   const containerStyle = useAnimatedStyle(() => ({
     height: elementLayout.value.height,

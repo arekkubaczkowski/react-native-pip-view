@@ -14,10 +14,8 @@ interface Props {
 }
 
 export const ArrowButton = ({ side }: Props) => {
-  const { edgeHandleLayout, edgeHandle } = usePiPViewContext((state) => ({
-    edgeHandleLayout: state.edgeHandleLayout,
-    edgeHandle: state.edgeHandle,
-  }));
+  const edgeHandleLayout = usePiPViewContext((state) => state.edgeHandleLayout);
+  const edgeHandle = usePiPViewContext((state) => state.edgeHandle);
 
   const containerStyles = useAnimatedStyle(() => ({
     borderTopRightRadius: side === 'right' ? 8 : 0,
@@ -44,10 +42,10 @@ export const ArrowButton = ({ side }: Props) => {
       return;
     }
 
-    edgeHandleLayout.value = {
+    edgeHandleLayout.set({
       width: event.nativeEvent.layout.width,
       height: event.nativeEvent.layout.height,
-    };
+    });
   };
 
   return (

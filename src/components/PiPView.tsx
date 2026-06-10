@@ -1,19 +1,28 @@
-import { useCallback, useMemo, type PropsWithChildren } from 'react';
+import { type PropsWithChildren } from 'react';
 import { type LayoutRectangle } from 'react-native';
 import { useDerivedValue, useSharedValue } from 'react-native-reanimated';
 
 import { type Dimensions, type EdgeSide, type PiPViewProps } from '../models';
 import { PiPViewProvider } from '../context/PiPView.provider';
 import { PiPViewImpl } from './PiPViewImpl';
-import { getEdges } from '../utils';
+import { getEdges } from '../utils/snapping';
 import { useInitialPosition } from '../hooks/useInitialPosition';
+
+const OVER_DRAG_OFFSET_MULTIPLIER = 0.4;
+const DESTROY_CALLBACK_DELAY_MS = 150;
 
 export const PiPView = ({
   children,
-  ...props
+  disabled,
+  destroyArea,
+  initialPosition,
+  hideable,
+  layout,
+  snapToEdges,
+  edgeHandle,
+  onDestroy,
+  onPress,
 }: PropsWithChildren<PiPViewProps>) => {
-  const { layout, initialPosition, onDestroy, edgeHandle } = props;
-
   const dockSide = useSharedValue<EdgeSide | null>(null);
 
   const elementLayout = useSharedValue<LayoutRectangle>({
@@ -58,70 +67,59 @@ export const PiPView = ({
     return getEdges(layout, scaledElementLayout);
   });
 
-  const positionValues = useInitialPosition({
-    initialPosition,
-    edges,
-    isInitialized,
-    layout,
-  });
+  const { translationX, translationY, prevTranslationX, prevTranslationY } =
+    useInitialPosition({
+      initialPosition,
+      edges,
+      isInitialized,
+      layout,
+    });
 
   const overDragOffset = useDerivedValue(
-    () => scaledElementLayout.value.width * 0.4
+    () => scaledElementLayout.value.width * OVER_DRAG_OFFSET_MULTIPLIER
   );
 
   const overDragSide = useSharedValue<EdgeSide | null>(null);
 
-  const handleDestroy = useCallback(() => {
-    isDestroyed.value = true;
+  const handleDestroy = () => {
+    isDestroyed.set(true);
 
-    const timeout = setTimeout(() => {
+    setTimeout(() => {
       onDestroy?.();
-    }, 150);
+    }, DESTROY_CALLBACK_DELAY_MS);
+  };
 
-    return () => {
-      clearTimeout(timeout);
-    };
-  }, [isDestroyed, onDestroy]);
-
-  const contextValue = useMemo(
-    () => ({
-      dockSide,
-      overDragSide,
-      scale,
-      elementLayout,
-      scaledElementLayout,
-      isPanActive,
-      isHighlightAreaActive,
-      isDestroyed,
-      isInitialized,
-      edges,
-      overDragOffset,
-      handleDestroy,
-      edgeHandleLayout,
-      ...positionValues,
-      ...props,
-    }),
-    [
-      dockSide,
-      overDragSide,
-      scale,
-      elementLayout,
-      isPanActive,
-      overDragOffset,
-      handleDestroy,
-      isHighlightAreaActive,
-      scaledElementLayout,
-      isDestroyed,
-      positionValues,
-      isInitialized,
-      edgeHandleLayout,
-      edges,
-      props,
-    ]
-  );
+  const contextValue = {
+    disabled,
+    destroyArea,
+    initialPosition,
+    hideable,
+    layout,
+    snapToEdges,
+    edgeHandle,
+    onDestroy,
+    onPress,
+    dockSide,
+    overDragSide,
+    scale,
+    elementLayout,
+    scaledElementLayout,
+    isPanActive,
+    isHighlightAreaActive,
+    isDestroyed,
+    isInitialized,
+    edges,
+    overDragOffset,
+    handleDestroy,
+    edgeHandleLayout,
+    translationX,
+    translationY,
+    prevTranslationX,
+    prevTranslationY,
+  };
 
   return (
-    <PiPViewProvider {...contextValue}>
+    <PiPViewProvider value={contextValue}>
       <PiPViewImpl>{children}</PiPViewImpl>
     </PiPViewProvider>
   );

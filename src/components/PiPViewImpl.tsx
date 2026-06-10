@@ -1,4 +1,4 @@
-import { useCallback, useMemo, type PropsWithChildren } from 'react';
+import { type PropsWithChildren } from 'react';
 import { StyleSheet, type LayoutChangeEvent } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
@@ -8,64 +8,54 @@ import Animated, {
   withDelay,
   withSpring,
   withTiming,
-  type SharedValue,
 } from 'react-native-reanimated';
 
 import { animationsPresets } from '../constants';
 import { LeftEdgeHandle } from './LeftEdgeHandle';
-import { type ContainerLayoutRectangle, type Dimensions } from '../models';
 import { usePiPViewContext } from '../context/PiPView.provider';
 import { RightEdgeHandle } from './RightEdgeHandle';
-import { getEdges } from '../utils';
+import { getCurrentHorizontalSide, getEdges } from '../utils/snapping';
 import { usePanGesture } from '../hooks/usePanGesture';
 import { usePinchGesture } from '../hooks/usePinchGesture';
 import { useDragHelpers } from '../hooks/useDragHelpers';
 
 export const PiPViewImpl = ({ children }: PropsWithChildren) => {
-  const {
-    elementLayout,
-    scaledElementLayout,
-    isDestroyed,
-    layout,
-    dockSide,
-    translationX,
-    translationY,
-    isInitialized,
-    edges,
-    overDragSide,
-    isHighlightAreaActive,
-    isPanActive,
-    onPress,
-    scale,
-    destroyArea,
-    edgeHandleLayout,
-  } = usePiPViewContext((state) => ({
-    elementLayout: state.elementLayout,
-    overDragSide: state.overDragSide,
-    onDestroy: state.onDestroy,
-    initialPosition: state.initialPosition,
-    edges: state.edges,
-    isInitialized: state.isInitialized,
-    scaledElementLayout: state.scaledElementLayout,
-    isDestroyed: state.isDestroyed,
-    destroyArea: state.destroyArea,
-    layout: state.layout,
-    translationY: state.translationY,
-    translationX: state.translationX,
-    dockSide: state.dockSide,
-    isHighlightAreaActive: state.isHighlightAreaActive,
-    onPress: state.onPress,
-    isPanActive: state.isPanActive,
-    scale: state.scale,
-    edgeHandleLayout: state.edgeHandleLayout,
-  }));
-
-  const handleLayoutChange = useCallback(
-    (event: LayoutChangeEvent) => {
-      elementLayout.value = event.nativeEvent.layout;
-    },
-    [elementLayout]
+  const elementLayout = usePiPViewContext((state) => state.elementLayout);
+  const scaledElementLayout = usePiPViewContext(
+    (state) => state.scaledElementLayout
   );
+  const isDestroyed = usePiPViewContext((state) => state.isDestroyed);
+  const layout = usePiPViewContext((state) => state.layout);
+  const dockSide = usePiPViewContext((state) => state.dockSide);
+  const translationX = usePiPViewContext((state) => state.translationX);
+  const translationY = usePiPViewContext((state) => state.translationY);
+  const isInitialized = usePiPViewContext((state) => state.isInitialized);
+  const edges = usePiPViewContext((state) => state.edges);
+  const overDragSide = usePiPViewContext((state) => state.overDragSide);
+  const isHighlightAreaActive = usePiPViewContext(
+    (state) => state.isHighlightAreaActive
+  );
+  const isPanActive = usePiPViewContext((state) => state.isPanActive);
+  const onPress = usePiPViewContext((state) => state.onPress);
+  const scale = usePiPViewContext((state) => state.scale);
+  const destroyArea = usePiPViewContext((state) => state.destroyArea);
+  const edgeHandleLayout = usePiPViewContext((state) => state.edgeHandleLayout);
+
+  // Captured as primitives so worklet closures below stay stable across
+  // consumer re-renders that pass a new (but equal) `layout` object —
+  // otherwise the reaction would re-register and snap the PiP on every
+  // render.
+  const {
+    x: layoutX,
+    y: layoutY,
+    width: layoutWidth,
+    height: layoutHeight,
+    horizontalOffset: layoutHorizontalOffset,
+  } = layout;
+
+  const handleLayoutChange = (event: LayoutChangeEvent) => {
+    elementLayout.set(event.nativeEvent.layout);
+  };
 
   const { pan: panGesture, handlePanEnd } = usePanGesture();
   const { pinchGesture } = usePinchGesture({ onEnd: handlePanEnd });
@@ -81,125 +71,124 @@ export const PiPViewImpl = ({ children }: PropsWithChildren) => {
   const offsetX = useDerivedValue(() => diffX.value / 2);
   const offsetY = useDerivedValue(() => diffY.value / 2);
 
-  const getCurrentHorizontalSide = useCallback(
-    (
-      currentContainerLayout: ContainerLayoutRectangle,
-      currentElementLayout: SharedValue<Dimensions>
-    ) => {
-      'worklet';
-      return translationX.value <
-        (currentContainerLayout.width - currentElementLayout.value.width) / 2
-        ? 'left'
-        : 'right';
-    },
-    [translationX]
-  );
+  const handleExpandView = () => {
+    // Guard against double invocation (RNGH tap + the handle's Touchable
+    // can both resolve the same press) — the second call would otherwise
+    // recompute targetX with dockSide already cleared.
+    if (!dockSide.get()) {
+      return;
+    }
 
-  const tapGesture = useMemo(
-    () =>
-      Gesture.Tap()
-        .runOnJS(true)
-        .shouldCancelWhenOutside(true)
-        .onTouchesUp(() => {
-          // This runs on JS thread due to .runOnJS(true)
-          if (dockSide.value) {
-            return;
-          }
-          onPress?.();
-        }),
-    [dockSide, onPress]
-  );
+    const minX = layoutHorizontalOffset ?? 0;
+    const maxX =
+      layoutWidth -
+      scaledElementLayout.get().width -
+      (layoutHorizontalOffset ?? 0);
+
+    const targetX = dockSide.get() === 'left' ? minX : maxX;
+    translationX.set(targetX);
+
+    const targetY = findNearestYEdge(translationY.get());
+    translationY.set(targetY);
+
+    overDragSide.set(null);
+    dockSide.set(null);
+  };
+
+  // `disabled` intentionally does not block the tap — it only disables
+  // dragging and scaling, while `onPress` keeps working.
+  //
+  // No .shouldCancelWhenOutside here: when the PiP is docked, the edge
+  // handle sits OUTSIDE the gesture view's bounds (translated past the
+  // edge), so cancel-when-outside would kill handle taps on Android
+  // (where it defaults to true). .maxDistance covers the
+  // "slide away and release" case instead.
+  const tapGesture = Gesture.Tap()
+    .runOnJS(true)
+    .shouldCancelWhenOutside(false)
+    .maxDistance(24)
+    .onEnd((_event, success) => {
+      // This runs on JS thread due to .runOnJS(true)
+      if (!success) {
+        return;
+      }
+      if (dockSide.get()) {
+        // When docked, this tap wins the race against the edge handle's
+        // Touchable (activation cancels its press), so the gesture itself
+        // must perform the expand — otherwise handle presses get swallowed.
+        handleExpandView();
+        return;
+      }
+      onPress?.();
+    });
 
   const gesture = Gesture.Race(
     tapGesture,
     Gesture.Simultaneous(panGesture, pinchGesture)
   );
 
-  const handleExpandView = useCallback(() => {
-    const minX = layout.horizontalOffset ?? 0;
-    const maxX =
-      layout.width -
-      scaledElementLayout.value.width -
-      (layout.horizontalOffset ?? 0);
-
-    const targetX = dockSide.value === 'left' ? minX : maxX;
-    translationX.value = targetX;
-
-    const targetY = findNearestYEdge(translationY.value);
-    translationY.value = targetY;
-
-    overDragSide.value = null;
-    dockSide.value = null;
-  }, [
-    layout.horizontalOffset,
-    layout.width,
-    scaledElementLayout.value.width,
-    dockSide,
-    translationX,
-    findNearestYEdge,
-    translationY,
-    overDragSide,
-  ]);
-
   useAnimatedReaction(
-    () => ({
-      currentContainerLayout: layout,
-      currentScaledElementLayout: scaledElementLayout,
-    }),
-    ({ currentContainerLayout, currentScaledElementLayout }) => {
+    () => scaledElementLayout.value,
+    (currentScaledElementLayout) => {
       if (!edges.value) {
         return;
       }
       if (translationY.value > edges.value.maxY) {
-        translationY.value = edges.value.maxY;
+        translationY.set(edges.value.maxY);
       }
       if (translationY.value < edges.value.minY) {
-        translationY.value = edges.value.minY;
+        translationY.set(edges.value.minY);
       }
 
       if (!dockSide.value) {
         const currentEdges = getEdges(
-          currentContainerLayout,
-          currentScaledElementLayout
+          {
+            x: layoutX,
+            y: layoutY,
+            width: layoutWidth,
+            height: layoutHeight,
+            horizontalOffset: layoutHorizontalOffset,
+          },
+          scaledElementLayout
         );
         const snapToLeft =
           getCurrentHorizontalSide(
-            currentContainerLayout,
-            currentScaledElementLayout
+            translationX.value,
+            layoutWidth,
+            currentScaledElementLayout.width
           ) === 'left';
         const targetX = snapToLeft ? currentEdges.minX : currentEdges.maxX;
 
-        translationX.value = targetX;
+        translationX.set(targetX);
       }
-    },
-    [edges]
+    }
   );
 
   const animatedStyle = useAnimatedStyle(() => {
     const getOpacity = () => {
-      switch (true) {
-        case !!overDragSide.value:
-          return 1;
-        case isHighlightAreaActive.value:
-          return 0.7;
-        case isDestroyed.value:
-          return 0;
-        default:
-          return 1;
+      if (overDragSide.value) {
+        return 1;
       }
+      if (isHighlightAreaActive.value) {
+        return 0.7;
+      }
+      if (isDestroyed.value) {
+        return 0;
+      }
+      return 1;
     };
 
     const getExtraOffsetX = () => {
-      switch (true) {
-        case overDragSide.value === null || !!dockSide.value:
-          return 0;
-        case overDragSide.value === 'left':
-          return -edgeHandleLayout.value.width;
-        case overDragSide.value === 'right':
-          return edgeHandleLayout.value.width;
-        default:
-          return 0;
+      if (overDragSide.value === null || dockSide.value) {
+        return 0;
       }
+      if (overDragSide.value === 'left') {
+        return -edgeHandleLayout.value.width;
+      }
+      if (overDragSide.value === 'right') {
+        return edgeHandleLayout.value.width;
+      }
+      return 0;
     };
 
     const extraOverDragOffsetX = getExtraOffsetX();
@@ -218,6 +207,10 @@ export const PiPViewImpl = ({ children }: PropsWithChildren) => {
             animationsPresets.lazy
           ),
         },
+        // Intentionally two separate `scale` entries — RN composes
+        // transforms multiplicatively (matrix product), so the pinch
+        // spring and the state-driven timing animate independently.
+        // Do NOT merge them into a single entry.
         {
           scale: withSpring(scale.value, animationsPresets.softLanding),
         },
@@ -236,7 +229,6 @@ export const PiPViewImpl = ({ children }: PropsWithChildren) => {
   const destroyAreaStyle = useAnimatedStyle(() => {
     const active = isPanActive.value && !dockSide.value;
     return {
-      opacity: 1,
       backgroundColor: withTiming(
         isHighlightAreaActive.value
           ? destroyArea?.activeColor || 'rgba(255, 255, 255, 0.15)'
@@ -251,7 +243,10 @@ export const PiPViewImpl = ({ children }: PropsWithChildren) => {
     };
   });
 
-  const containerStyles = useAnimatedStyle(() => ({
+  // Kept separate from the size style below — the size updates every frame
+  // during a pinch, and re-evaluating withDelay/withSpring alongside it
+  // would restart the entry animation on each frame.
+  const containerOpacityStyle = useAnimatedStyle(() => ({
     opacity: withDelay(
       200,
       withSpring(
@@ -259,7 +254,12 @@ export const PiPViewImpl = ({ children }: PropsWithChildren) => {
         animationsPresets.responsiveSpring
       )
     ),
-    // Constrain the container to the PIP element size. Without explicit
+  }));
+
+  // Constrain the container to the PiP element size. Without explicit
+  // width/height the gesture detector's hit area would extend beyond the
+  // visible PiP (issue #4).
+  const containerSizeStyle = useAnimatedStyle(() => ({
     width: scaledElementLayout.value.width,
     height: scaledElementLayout.value.height,
   }));
@@ -272,7 +272,7 @@ export const PiPViewImpl = ({ children }: PropsWithChildren) => {
 
       {layout.width > 0 && layout.height > 0 && (
         <Animated.View
-          style={[containerStyles, styles.container]}
+          style={[containerOpacityStyle, containerSizeStyle, styles.container]}
           pointerEvents="box-none"
         >
           <GestureDetector gesture={gesture}>
