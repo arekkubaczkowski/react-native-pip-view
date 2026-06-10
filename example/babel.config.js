@@ -1,17 +1,13 @@
-const path = require('path');
-const { getConfig } = require('react-native-builder-bob/babel-config');
-const pkg = require('../package.json');
-
-const root = path.resolve(__dirname, '..');
-
 module.exports = function (api) {
   api.cache(true);
 
-  return getConfig(
-    {
-      presets: ['babel-preset-expo'],
-      plugins: ['react-native-worklets/plugin'],
-    },
-    { root, pkg }
-  );
+  return {
+    // NOTE: SDK 56 metro computes the babel cache key without a filename,
+    // which crashes on react-native-builder-bob's getConfig() path-based
+    // `overrides` ("Configuration contains string/RegExp pattern, but no
+    // filename was passed to Babel"). The library source is still aliased
+    // via builder-bob's metro-config and compiled by babel-preset-expo.
+    presets: ['babel-preset-expo'],
+    plugins: ['react-native-worklets/plugin'],
+  };
 };
