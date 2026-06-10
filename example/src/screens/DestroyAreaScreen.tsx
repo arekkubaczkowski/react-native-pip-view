@@ -11,12 +11,12 @@ import { PiPView } from 'react-native-pip-view';
 import {
   DragAreaIndicator,
   PipContent,
+  ROOT_TOP_PADDING,
   ScreenInfo,
   usePipLayout,
 } from './shared';
 
 const DESTROY_AREA_HEIGHT = 110;
-const ROOT_TOP_PADDING = 60;
 const DESTROY_AREA_BOTTOM_MARGIN = 30;
 
 export const DestroyAreaScreen = () => {

@@ -60,11 +60,31 @@ export const PiPView = ({
     height: elementLayout.value.height * scale.value,
   }));
 
+  // Primitives keep the worklet closure stable when the consumer passes
+  // a new (but equal) `layout` object on re-render — otherwise this
+  // derived value would be re-registered on every render.
+  const {
+    x: layoutX,
+    y: layoutY,
+    width: layoutWidth,
+    height: layoutHeight,
+    horizontalOffset: layoutHorizontalOffset,
+  } = layout;
+
   const edges = useDerivedValue(() => {
     if (!isInitialized.value) {
       return null;
     }
-    return getEdges(layout, scaledElementLayout);
+    return getEdges(
+      {
+        x: layoutX,
+        y: layoutY,
+        width: layoutWidth,
+        height: layoutHeight,
+        horizontalOffset: layoutHorizontalOffset,
+      },
+      scaledElementLayout
+    );
   });
 
   const { translationX, translationY, prevTranslationX, prevTranslationY } =

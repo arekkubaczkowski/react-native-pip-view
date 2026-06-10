@@ -48,14 +48,25 @@ export const useDragHelpers = () => {
     return y < midY ? edges.get().minY : edges.get().maxY;
   };
 
+  // Primitives keep the worklet closure stable when the consumer passes
+  // a new (but equal) `destroyArea` object on re-render — otherwise the
+  // pan gesture capturing this helper would be rebuilt on every render.
+  const destroyAreaX = destroyArea?.layout.x;
+  const destroyAreaY = destroyArea?.layout.y;
+  const destroyAreaWidth = destroyArea?.layout.width;
+  const destroyAreaHeight = destroyArea?.layout.height;
+
   const isWithinDestroyArea = (x: number, y: number) => {
     'worklet';
-    return isWithinDestroyAreaUtil(
-      x,
-      y,
-      scaledElementLayout.get(),
-      destroyArea?.layout
-    );
+    if (destroyAreaWidth == null || destroyAreaHeight == null) {
+      return false;
+    }
+    return isWithinDestroyAreaUtil(x, y, scaledElementLayout.get(), {
+      x: destroyAreaX,
+      y: destroyAreaY,
+      width: destroyAreaWidth,
+      height: destroyAreaHeight,
+    });
   };
 
   const handleHideTransition = (targetX: number, side: EdgeSide) => {

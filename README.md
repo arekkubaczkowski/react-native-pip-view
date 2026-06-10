@@ -87,6 +87,7 @@ export default function App() {
 
 > 💡 **Tip:** Object props (`layout`, `destroyArea`, `initialPosition`, `edgeHandle`) and callbacks (`onPress`, `onDestroy`) should be memoized (`useMemo` / `useCallback`) in the consuming component. Inline literals create a new reference on every render, which forces unnecessary re-renders of the PiP internals.
 > Note that `disabled` only disables dragging and scaling — `onPress` still fires on tap.
+> A tap on interactive content **inside** the PiP (buttons, pressables) also counts as a tap on the PiP itself — `onPress` fires alongside the child's own press handler.
 
 ### 🔻 `DestroyArea`
 

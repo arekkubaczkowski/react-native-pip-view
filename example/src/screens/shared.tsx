@@ -13,7 +13,7 @@ export const HEADER_HEIGHT = 200;
 // Root view has paddingTop: 60, and the pip wrapper (absoluteFill) lives
 // inside it — layout coordinates are relative to the wrapper, so absolute
 // screen positions need to be shifted by this padding.
-const ROOT_TOP_PADDING = 60;
+export const ROOT_TOP_PADDING = 60;
 
 export const usePipLayout = (bottomInset = 40, topOffset = HEADER_HEIGHT) => {
   const { width, height } = useWindowDimensions();

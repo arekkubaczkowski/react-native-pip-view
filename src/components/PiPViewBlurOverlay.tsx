@@ -26,7 +26,7 @@ export const PiPViewBlurOverlay = ({ style }: Props) => {
         style={StyleSheet.absoluteFill}
         intensity={20}
         tint="dark"
-        blurMethod="dimezisBlurViewSdk31Plus"
+        experimentalBlurMethod="dimezisBlurView"
       />
     </Animated.View>
   );
