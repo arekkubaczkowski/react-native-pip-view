@@ -11576,6 +11576,7 @@ __metadata:
     "@release-it/conventional-changelog": ^11.0.1
     "@types/jest": ^29.5.14
     "@types/react": 19.2.17
+    babel-plugin-react-compiler: ^1.0.0
     commitlint: ^21.0.2
     del-cli: ^7.0.0
     eslint: ^9.39.4

@@ -1,17 +1,20 @@
-import { useCallback, useMemo } from 'react';
 import {
   Gesture,
   type GestureStateChangeEvent,
   type PanGestureHandlerEventPayload,
   type PanGesture,
 } from 'react-native-gesture-handler';
-import { clamp, runOnJS, useDerivedValue } from 'react-native-reanimated';
+import { clamp, useDerivedValue } from 'react-native-reanimated';
+import { scheduleOnRN } from 'react-native-worklets';
 
 import { useDragHelpers } from './useDragHelpers';
 import { usePiPViewContext } from '../context/PiPView.provider';
+import { applyResistance } from '../utils/gestures';
+import { getCurrentHorizontalSide } from '../utils/snapping';
 
 const VELOCITY_Y_MULTIPLIER = 0.1;
 const VELOCITY_X_MULTIPLIER = 0.05;
+const VELOCITY_THRESHOLD = 1700;
 
 export const usePanGesture = (): {
   pan: PanGesture;
@@ -19,39 +22,28 @@ export const usePanGesture = (): {
     event?: GestureStateChangeEvent<PanGestureHandlerEventPayload>
   ) => void;
 } => {
-  const {
-    _providedEdges,
-    dockSide,
-    scaledElementLayout,
-    hideable,
-    snapToEdges,
-    translationX,
-    translationY,
-    overDragSide,
-    isPanActive,
-    isHighlightAreaActive,
-    layout,
-    disabled,
-    onDestroy,
-    prevTranslationX,
-    prevTranslationY,
-  } = usePiPViewContext((state) => ({
-    snapToEdges: state.snapToEdges,
-    _providedEdges: state.edges,
-    dockSide: state.dockSide,
-    scaledElementLayout: state.scaledElementLayout,
-    translationX: state.translationX,
-    hideable: state.hideable,
-    translationY: state.translationY,
-    overDragSide: state.overDragSide,
-    isPanActive: state.isPanActive,
-    isHighlightAreaActive: state.isHighlightAreaActive,
-    layout: state.layout,
-    disabled: state.disabled,
-    onDestroy: state.onDestroy,
-    prevTranslationX: state.prevTranslationX,
-    prevTranslationY: state.prevTranslationY,
-  }));
+  const snapToEdges = usePiPViewContext((state) => state.snapToEdges);
+  const _providedEdges = usePiPViewContext((state) => state.edges);
+  const dockSide = usePiPViewContext((state) => state.dockSide);
+  const scaledElementLayout = usePiPViewContext(
+    (state) => state.scaledElementLayout
+  );
+  const translationX = usePiPViewContext((state) => state.translationX);
+  const hideable = usePiPViewContext((state) => state.hideable);
+  const translationY = usePiPViewContext((state) => state.translationY);
+  const overDragSide = usePiPViewContext((state) => state.overDragSide);
+  const isPanActive = usePiPViewContext((state) => state.isPanActive);
+  const isHighlightAreaActive = usePiPViewContext(
+    (state) => state.isHighlightAreaActive
+  );
+  const layout = usePiPViewContext((state) => state.layout);
+  const disabled = usePiPViewContext((state) => state.disabled);
+  const onDestroy = usePiPViewContext((state) => state.onDestroy);
+  const handleDestroy = usePiPViewContext((state) => state.handleDestroy);
+  const isDestroyed = usePiPViewContext((state) => state.isDestroyed);
+  const prevTranslationX = usePiPViewContext((state) => state.prevTranslationX);
+  const prevTranslationY = usePiPViewContext((state) => state.prevTranslationY);
+
   const edges = useDerivedValue(
     () =>
       _providedEdges.value || {
@@ -63,221 +55,185 @@ export const usePanGesture = (): {
   );
 
   const {
-    applyResistance,
     checkOverDrag,
     findNearestYEdge,
-    handleHideTansition,
-    isWithinHighlightArea,
+    handleHideTransition,
+    isWithinDestroyArea,
   } = useDragHelpers();
+
+  // Primitives keep the worklet closures stable when the consumer passes
+  // a new (but equal) `layout` object on re-render — otherwise the pan
+  // gesture would be rebuilt and re-attached on every render.
+  const { width: layoutWidth, horizontalOffset: layoutHorizontalOffset } =
+    layout;
 
   const hiddenLeftXValue = useDerivedValue(
     () =>
       edges.value.minX -
       scaledElementLayout.value.width -
-      (layout.horizontalOffset ?? 0) * 1
+      (layoutHorizontalOffset ?? 0)
   );
 
   const hiddenRightXValue = useDerivedValue(
     () =>
       edges.value.maxX +
       scaledElementLayout.value.width +
-      (layout.horizontalOffset ?? 0) * 1
+      (layoutHorizontalOffset ?? 0)
   );
 
-  const handlePanEnd = useCallback(
-    (event?: GestureStateChangeEvent<PanGestureHandlerEventPayload>) => {
-      'worklet';
+  const handlePanEnd = (
+    event?: GestureStateChangeEvent<PanGestureHandlerEventPayload>
+  ) => {
+    'worklet';
 
-      const velocityX = event?.velocityX || 0;
-      const velocityY = event?.velocityY || 0;
-      const velocityThreshold = 1700;
+    const velocityX = event?.velocityX || 0;
+    const velocityY = event?.velocityY || 0;
 
-      const [isOverDraggedLeft, isOverDraggedRight] = checkOverDrag(
-        translationX.value
-      );
-      let dockSideTmp = dockSide.value;
+    const [isOverDraggedLeft, isOverDraggedRight] = checkOverDrag(
+      translationX.get()
+    );
+    let dockSideTmp = dockSide.get();
 
-      if (isOverDraggedLeft) {
-        translationX.set(hiddenLeftXValue.value);
-        dockSide.set('left');
-        dockSideTmp = 'left';
+    if (isOverDraggedLeft) {
+      translationX.set(hiddenLeftXValue.get());
+      dockSide.set('left');
+      dockSideTmp = 'left';
 
-        isPanActive.set(false);
-        isHighlightAreaActive.set(false);
-        overDragSide.set(null);
-
-        if (snapToEdges) {
-          translationY.set(translationY.value);
-        }
-
-        return;
-      } else if (isOverDraggedRight) {
-        translationX.set(hiddenRightXValue.value);
-        dockSide.set('right');
-        dockSideTmp = 'right';
-
-        isPanActive.set(false);
-        isHighlightAreaActive.set(false);
-        overDragSide.set(null);
-
-        if (snapToEdges) {
-          translationY.set(translationY.value);
-        }
-
-        return;
-      }
-
-      const targetYWithVelocity =
-        translationY.value + velocityY * VELOCITY_Y_MULTIPLIER;
-      const clampedY = clamp(
-        targetYWithVelocity,
-        edges.value.minY,
-        edges.value.maxY
-      );
-
-      const targetXWithVelocity =
-        translationX.value + velocityX * VELOCITY_X_MULTIPLIER;
-
-      const snapToLeft =
-        targetXWithVelocity <
-        (layout.width - scaledElementLayout.value.width) / 2;
-
-      let targetX = 0;
-
-      const shouldHideLeft =
-        targetXWithVelocity < edges.value.minX &&
-        velocityX < -velocityThreshold &&
-        hideable;
-      const shouldHideRight =
-        targetXWithVelocity > edges.value.maxX &&
-        velocityX > velocityThreshold &&
-        hideable;
-
-      if (shouldHideLeft) {
-        targetX = hiddenLeftXValue.value;
-
-        handleHideTansition(targetX, 'left');
-      } else if (shouldHideRight) {
-        targetX = hiddenRightXValue.value;
-
-        handleHideTansition(targetX, 'right');
-      } else {
-        targetX = snapToLeft ? edges.value.minX : edges.value.maxX;
-        dockSide.set(null);
-        dockSideTmp = null;
-      }
-
-      if (!dockSideTmp && !shouldHideLeft && !shouldHideRight) {
-        translationX.set(targetX);
-      }
-      if (snapToEdges && !dockSideTmp) {
-        translationY.set(findNearestYEdge(clampedY));
-      } else {
-        translationY.set(clampedY);
-      }
       isPanActive.set(false);
       isHighlightAreaActive.set(false);
       overDragSide.set(null);
-    },
-    [
-      checkOverDrag,
-      translationX,
-      translationY,
-      edges.value.minY,
-      edges.value.maxY,
-      edges.value.minX,
-      edges.value.maxX,
-      layout.width,
-      scaledElementLayout.value.width,
-      hideable,
-      dockSide,
-      snapToEdges,
-      isPanActive,
-      isHighlightAreaActive,
-      overDragSide,
-      hiddenLeftXValue.value,
-      hiddenRightXValue.value,
-      handleHideTansition,
-      findNearestYEdge,
-    ]
-  );
 
-  const pan = useMemo(() => {
-    return Gesture.Pan()
-      .onStart(() => {
-        'worklet';
-        if (disabled) {
-          return;
-        }
-        prevTranslationX.set(translationX.value);
-        prevTranslationY.set(translationY.value);
-        isPanActive.set(true);
-      })
-      .onUpdate((e) => {
-        'worklet';
-        if (disabled) {
-          return;
-        }
+      return;
+    } else if (isOverDraggedRight) {
+      translationX.set(hiddenRightXValue.get());
+      dockSide.set('right');
+      dockSideTmp = 'right';
 
-        const newTranslationY = prevTranslationY.value + e.translationY;
+      isPanActive.set(false);
+      isHighlightAreaActive.set(false);
+      overDragSide.set(null);
 
-        translationY.set(
-          applyResistance(newTranslationY, edges.value.minY, edges.value.maxY)
-        );
+      return;
+    }
 
-        const newTranslationX = prevTranslationX.value + e.translationX;
+    const targetYWithVelocity =
+      translationY.get() + velocityY * VELOCITY_Y_MULTIPLIER;
+    const clampedY = clamp(
+      targetYWithVelocity,
+      edges.get().minY,
+      edges.get().maxY
+    );
 
-        if (isWithinHighlightArea(newTranslationX, newTranslationY)) {
-          isHighlightAreaActive.set(true);
-        } else {
-          isHighlightAreaActive.set(false);
-        }
+    const targetXWithVelocity =
+      translationX.get() + velocityX * VELOCITY_X_MULTIPLIER;
 
-        const [isOverDraggedLeft, isOverDraggedRight] =
-          checkOverDrag(newTranslationX);
+    const snapToLeft =
+      getCurrentHorizontalSide(
+        targetXWithVelocity,
+        layoutWidth,
+        scaledElementLayout.get().width
+      ) === 'left';
 
-        if (isOverDraggedLeft) {
-          overDragSide.set('left');
-        } else if (isOverDraggedRight) {
-          overDragSide.set('right');
-        } else {
-          overDragSide.set(null);
-        }
+    let targetX = 0;
 
-        translationX.set(newTranslationX);
-      })
-      .onEnd((event) => {
-        'worklet';
-        if (disabled) {
-          return;
-        }
+    const shouldHideLeft =
+      targetXWithVelocity < edges.get().minX &&
+      velocityX < -VELOCITY_THRESHOLD &&
+      hideable;
+    const shouldHideRight =
+      targetXWithVelocity > edges.get().maxX &&
+      velocityX > VELOCITY_THRESHOLD &&
+      hideable;
 
-        if (
-          onDestroy &&
-          isWithinHighlightArea(translationX.value, translationY.value)
-        ) {
-          runOnJS(onDestroy)();
-          return;
-        }
-        handlePanEnd(event);
-      });
-  }, [
-    applyResistance,
-    checkOverDrag,
-    disabled,
-    edges.value.maxY,
-    edges.value.minY,
-    handlePanEnd,
-    isPanActive,
-    isHighlightAreaActive,
-    isWithinHighlightArea,
-    onDestroy,
-    overDragSide,
-    prevTranslationX,
-    prevTranslationY,
-    translationX,
-    translationY,
-  ]);
+    if (shouldHideLeft) {
+      targetX = hiddenLeftXValue.get();
+
+      handleHideTransition(targetX, 'left');
+    } else if (shouldHideRight) {
+      targetX = hiddenRightXValue.get();
+
+      handleHideTransition(targetX, 'right');
+    } else {
+      targetX = snapToLeft ? edges.get().minX : edges.get().maxX;
+      dockSide.set(null);
+      dockSideTmp = null;
+    }
+
+    if (!dockSideTmp && !shouldHideLeft && !shouldHideRight) {
+      translationX.set(targetX);
+    }
+    if (snapToEdges && !dockSideTmp) {
+      translationY.set(findNearestYEdge(clampedY));
+    } else {
+      translationY.set(clampedY);
+    }
+    isPanActive.set(false);
+    isHighlightAreaActive.set(false);
+    overDragSide.set(null);
+  };
+
+  const pan = Gesture.Pan()
+    .enabled(!disabled)
+    .onStart(() => {
+      'worklet';
+      prevTranslationX.set(translationX.get());
+      prevTranslationY.set(translationY.get());
+      isPanActive.set(true);
+    })
+    .onUpdate((e) => {
+      'worklet';
+      const newTranslationY = prevTranslationY.get() + e.translationY;
+
+      translationY.set(
+        applyResistance(newTranslationY, edges.get().minY, edges.get().maxY)
+      );
+
+      const rawTranslationX = prevTranslationX.get() + e.translationX;
+      // When the view cannot be hidden there is no overdrag, so pushing
+      // past the horizontal edges should feel resistant, same as the Y axis.
+      const newTranslationX = hideable
+        ? rawTranslationX
+        : applyResistance(rawTranslationX, edges.get().minX, edges.get().maxX);
+
+      isHighlightAreaActive.set(
+        isWithinDestroyArea(newTranslationX, newTranslationY)
+      );
+
+      const [isOverDraggedLeft, isOverDraggedRight] =
+        checkOverDrag(newTranslationX);
+
+      if (isOverDraggedLeft) {
+        overDragSide.set('left');
+      } else if (isOverDraggedRight) {
+        overDragSide.set('right');
+      } else {
+        overDragSide.set(null);
+      }
+
+      translationX.set(newTranslationX);
+    })
+    .onEnd((event) => {
+      'worklet';
+      if (
+        onDestroy &&
+        isWithinDestroyArea(translationX.get(), translationY.get())
+      ) {
+        // Set on the UI thread right away — scheduleOnRN lands a frame or
+        // two later and the destroy animation would briefly flicker.
+        isDestroyed.set(true);
+        scheduleOnRN(handleDestroy);
+        return;
+      }
+      handlePanEnd(event);
+    })
+    .onFinalize(() => {
+      'worklet';
+      // Cleanup that survives gesture cancellation (e.g. `disabled`
+      // flipping mid-gesture) — onEnd is not guaranteed to run then.
+      isPanActive.set(false);
+      isHighlightAreaActive.set(false);
+      overDragSide.set(null);
+    });
 
   return { pan, handlePanEnd };
 };

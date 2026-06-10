@@ -1,4 +1,4 @@
-import { useMemo, type PropsWithChildren } from 'react';
+import { type PropsWithChildren } from 'react';
 import { type LayoutRectangle } from 'react-native';
 import { type SharedValue } from 'react-native-reanimated';
 import { createContext, useContextSelector } from 'use-context-selector';
@@ -38,14 +38,14 @@ type PiPViewContextType =
 
 const PiPViewContext = createContext<PiPViewContextType>(null);
 
-interface Props extends NonNullable<PiPViewContextType> {}
+interface Props {
+  value: NonNullable<PiPViewContextType>;
+}
 
 export const PiPViewProvider = ({
   children,
-  ...props
+  value,
 }: PropsWithChildren<Props>) => {
-  const value = useMemo(() => props, [props]);
-
   return (
     <PiPViewContext.Provider value={value}>{children}</PiPViewContext.Provider>
   );

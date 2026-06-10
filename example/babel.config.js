@@ -8,6 +8,15 @@ module.exports = function (api) {
     // filename was passed to Babel"). The library source is still aliased
     // via builder-bob's metro-config and compiled by babel-preset-expo.
     presets: ['babel-preset-expo'],
-    plugins: ['react-native-worklets/plugin'],
+    plugins: [
+      [
+        'babel-plugin-react-compiler',
+        {
+          target: '19',
+          panicThreshold: 'all_errors',
+        },
+      ],
+      'react-native-worklets/plugin',
+    ],
   };
 };
